@@ -50,9 +50,19 @@ for t in range(simulation_steps):
 
     # Collecting data at the current timestep
     timestep_data = []
+    timestep_data.append(t)
+    timestep_data.append(N)
     for particle in particle_list:
-        timestep_data.append(particle.position_history[-1].tolist() + particle.velocity_history[-1].tolist() + [particle.mass])
-    simulation_data.append([t] + [N] + timestep_data)
+        #timestep_data.append(particle.position_history[-1].tolist() + particle.velocity_history[-1].tolist() + [particle.mass])
+        timestep_data.append(particle.position_history[-1][0])
+        timestep_data.append(particle.position_history[-1][1])
+        timestep_data.append(particle.position_history[-1][2])
+        timestep_data.append(particle.velocity_history[-1][0])
+        timestep_data.append(particle.velocity_history[-1][1])
+        timestep_data.append(particle.velocity_history[-1][2])
+        timestep_data.append(particle.mass)
+
+    simulation_data.append(timestep_data)
 
 with open('simulation_data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
