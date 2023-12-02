@@ -20,12 +20,12 @@ points = vtk.vtkPoints()
 for index, row in data.iterrows():
     N = row['number_of_particles']
     timestep = index
-    for i in range(N):
-        x = row[f'particle_{i}_pos_x']
-        y = row[f'particle_{i}_pos_y']
-        z = row[f'particle_{i}_pos_z']
-        m = row[f'particle_{i}_mass']
-        
+    for i in range(int(N)):
+        x = float(row[f'particle_{i}_pos_x'])
+        y = float(row[f'particle_{i}_pos_y'])
+        z = float(row[f'particle_{i}_pos_z'])
+        m = float(row[f'particle_{i}_mass'])
+
         points.InsertNextPoint(x, y, z)
     # Access data from each row with row['column_name']
     # For example, row['name'] or row['age'] if your columns are named 'name' and 'age'
