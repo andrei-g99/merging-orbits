@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import os
 
 class particle:
     def __init__(self, initial_position, initial_velocity, mass, radius = 10):
@@ -13,7 +14,7 @@ def radius_to_mass(radius):
 
 G = 1               # Gravity constant
 matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
-N = 4              # Total number of bodies
+N = 40              # Total number of bodies
 init_box_length = 1000
 particle_list = []
 
@@ -31,7 +32,7 @@ for i in range(N):
   particle_list.append(body)
 
 dt = 0.1
-simulation_steps = 1000
+simulation_steps = 10000
 simulation_data = []
 
 for t in range(simulation_steps):
@@ -63,6 +64,9 @@ for t in range(simulation_steps):
         timestep_data.append(particle.mass)
 
     simulation_data.append(timestep_data)
+
+file_path = 'simulation_data.csv'  # Replace with your file path
+os.remove(file_path)
 
 with open('simulation_data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
