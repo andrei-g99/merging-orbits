@@ -19,7 +19,7 @@ points = vtk.vtkPoints()
 # Example: points.InsertNextPoint(1.0, 2.0, 3.0)
 for index, row in data.iterrows():
     N = row['number_of_particles']
-    timestep = index
+    timestep = row['timestep']
     for i in range(int(N)):
         x = float(row[f'particle_{i}_pos_x'])
         y = float(row[f'particle_{i}_pos_y'])
@@ -46,7 +46,7 @@ actor.SetMapper(mapper)
 
 renderer.AddActor(actor)
 
-renderer.SetBackground(0.1, 0.2, 0.3)  # RGB background color
+renderer.SetBackground(0, 0, 0)  # RGB background color
 renderWindow.SetSize(800, 600)  # Window size
 
 renderWindow.Render()
