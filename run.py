@@ -14,7 +14,7 @@ def radius_to_mass(radius):
 
 G = 1               # Gravity constant
 matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
-N = 40              # Total number of bodies
+N = 100              # Total number of bodies
 init_box_length = 1000
 particle_list = []
 
@@ -28,7 +28,7 @@ for i in range(N):
   vz = 0.0005*init_box_length*(np.random.uniform()-0.5)
   m = 100*np.random.uniform()
   #create new body
-  body = particle(np.array([x, y, z]), np.array([vx,vy,vz]), m)
+  body = particle(np.array([x, y, z]), np.array([vx, vy, vz]), m)
   particle_list.append(body)
 
 dt = 0.1
@@ -66,7 +66,10 @@ for t in range(simulation_steps):
     simulation_data.append(timestep_data)
 
 file_path = 'simulation_data.csv'  # Replace with your file path
-os.remove(file_path)
+try:
+    os.remove(file_path)
+except:
+    print('Creating new file')
 
 with open('simulation_data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
