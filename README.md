@@ -1,5 +1,5 @@
 # merging-orbits
-Many body gravity simulator with body merger
+Multi-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
 
 # Dependencies
 - Conda environment
