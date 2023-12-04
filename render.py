@@ -106,7 +106,7 @@ renderWindowInteractor.SetRenderWindow(renderWindow)
 
 # Sphere source for glyphs
 sphereSource = vtk.vtkSphereSource()
-sphereSource.SetRadius(0.05)  # Set the radius of the spheres
+sphereSource.SetRadius(10)  # Set the radius of the spheres
 
 frames = []
 
@@ -116,7 +116,6 @@ cnt = 1
 for index, row in data.iterrows():
     if cnt == sampling_cnt_threshold:
         cnt = 1
-        print("enter")
         points = vtk.vtkPoints()
         N = row['number_of_particles']
         timestep = row['timestep']
@@ -143,6 +142,7 @@ for index, row in data.iterrows():
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(1, 0, 0)
         renderer.AddActor(actor)
 
         renderer.SetBackground(0, 0, 0)  # RGB background color
@@ -157,6 +157,12 @@ for index, row in data.iterrows():
         renderer.RemoveActor(actor)
 
     cnt += 1
+
+file_path = 'simulation_video.mp4'  # Replace with your file path
+try:
+    os.remove(file_path)
+except FileNotFoundError:
+    print('Creating new file')
 
 # Compile frames into a video
 clip = ImageSequenceClip(frames, fps=FPS)  # fps can be adjusted
