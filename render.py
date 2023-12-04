@@ -173,7 +173,7 @@ renderWindowInteractor.Start()
 path = '.'
 
 # Pattern to match files of the format 'frame_{number}.png'
-pattern = os.path.join(path, 'frame_*.png')
+pattern = os.path.join(path, 'frame_*')
 
 # Find all files matching the pattern
 files_to_delete = glob.glob(pattern)
