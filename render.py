@@ -87,7 +87,7 @@ data = pd.read_csv('simulation_data.csv')
 # sim_timesteps = 600, we need to sample only 600 timesteps regardless of how many the simulation provides!
 
 FPS = 60
-video_duration = 1
+video_duration = 10
 steps_to_sample = FPS*video_duration
 total_timesteps = len(data['timestep'])
 
@@ -117,15 +117,16 @@ for index, row in data.iterrows():
     if cnt == sampling_cnt_threshold:
         cnt = 1
         points = vtk.vtkPoints()
-        N = row['number_of_particles']
+        N = row['number_of_bodies']
         timestep = row['timestep']
         for i in range(int(N)):
-            x = float(row[f'particle_{i}_pos_x'])
-            y = float(row[f'particle_{i}_pos_y'])
-            z = float(row[f'particle_{i}_pos_z'])
-            m = float(row[f'particle_{i}_mass'])
+            if row[f'body_{i}_status']:
+                x = float(row[f'body_{i}_pos_x'])
+                y = float(row[f'body_{i}_pos_y'])
+                z = float(row[f'body_{i}_pos_z'])
+                m = float(row[f'body_{i}_mass'])
 
-            points.InsertNextPoint(x, y, z)
+                points.InsertNextPoint(x, y, z)
         # Access data from each row with row['column_name']
         # For example, row['name'] or row['age'] if your columns are named 'name' and 'age'
 
@@ -142,11 +143,11 @@ for index, row in data.iterrows():
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(1, 0, 0)
+        actor.GetProperty().SetColor(1, 1, 1)
         renderer.AddActor(actor)
 
         renderer.SetBackground(0, 0, 0)  # RGB background color
-        renderWindow.SetSize(800, 600)  # Window size
+        renderWindow.SetSize(1920, 1080)  # Window size
         # Render and save frame
         renderWindow.Render()
         frame_filename = f"frame_{timestep}.png"
