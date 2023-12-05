@@ -11,7 +11,7 @@ dt = config.dt
 N = config.N
 G = config.G
 
-for t in range(simulation_steps):
+def collisionsLoop():
     for i in body_list:
         # Collision handler and bound check
         if i.alive:
@@ -40,6 +40,7 @@ for t in range(simulation_steps):
                                 i.velocity_history[-1] = velocity_of_merger
                                 i.position_history[-1] = center_of_mass
 
+def gravityLoop():
     for i in body_list:
         # Propagate gravity dynamics
         if i.alive:
@@ -54,12 +55,17 @@ for t in range(simulation_steps):
                     position = i.position_history[-1] + velocity * dt
                     i.position_history.append(position)
 
+# Simulation loop
+for t in range(simulation_steps):
+
+    collisionsLoop()
+    gravityLoop()
+
     # Collecting data at the current timestep
     timestep_data = []
     timestep_data.append(t)
     timestep_data.append(N)
     for body in body_list:
-        #timestep_data.append(particle.position_history[-1].tolist() + particle.velocity_history[-1].tolist() + [particle.mass])
         timestep_data.append(body.position_history[-1][0])
         timestep_data.append(body.position_history[-1][1])
         timestep_data.append(body.position_history[-1][2])
