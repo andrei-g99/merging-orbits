@@ -67,17 +67,17 @@ for t in range(simulation_steps):
         timestep_data.append(body.velocity_history[-1][1])
         timestep_data.append(body.velocity_history[-1][2])
         timestep_data.append(body.mass)
-        timestep_data.append(1)
+        timestep_data.append(body.alive)
 
     simulation_data.append(timestep_data)
 
-file_path = 'simulation_data.csv'  # Replace with your file path
+file_path = f'{config.data_filename}.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
     print('Creating new file')
 
-with open('simulation_data.csv', 'w', newline='') as file:
+with open(file_path, 'w', newline='') as file:
     writer = csv.writer(file)
     # Write a header row (optional, depending on your data structure)
     header = ['timestep', 'number_of_bodies']
@@ -89,4 +89,4 @@ with open('simulation_data.csv', 'w', newline='') as file:
     # Write the data
     for row in simulation_data:
         writer.writerow(row)
-    print('simulation_data.csv has been generated')
+    print(f'{config.data_filename}.csv has been generated')
