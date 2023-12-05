@@ -1,5 +1,5 @@
 import os
-
+import config
 import numpy as np
 import mayavi.mlab as mlab
 import math
@@ -86,8 +86,8 @@ data = pd.read_csv('simulation_data.csv')
 # e.g. FPS = 60 and video_duration = 10
 # sim_timesteps = 600, we need to sample only 600 timesteps regardless of how many the simulation provides!
 
-FPS = 60
-video_duration = 10
+FPS = config.FPS
+video_duration = config.video_duration
 steps_to_sample = FPS*video_duration
 total_timesteps = len(data['timestep'])
 
@@ -106,13 +106,13 @@ renderWindowInteractor.SetRenderWindow(renderWindow)
 
 #Set camera
 camera = vtk.vtkCamera()
-camera.SetPosition(-500, 0, 500)
-camera.SetFocalPoint(0, 0, 0)
+camera.SetPosition(config.camera_position[0], config.camera_position[1], config.camera_position[2])
+camera.SetFocalPoint(config.camera_direction[0], config.camera_direction[1], config.camera_direction[2])
 renderer.SetActiveCamera(camera)
 
 # Sphere source for glyphs
 sphereSource = vtk.vtkSphereSource()
-sphereSource.SetRadius(10)  # Set the radius of the spheres
+sphereSource.SetRadius(config.spheres_radius)  # Set the radius of the spheres
 
 frames = []
 
@@ -149,11 +149,11 @@ for index, row in data.iterrows():
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(1, 1, 1)
+        actor.GetProperty().SetColor(config.sphere_color[0], config.sphere_color[1], config.sphere_color[2])
         renderer.AddActor(actor)
 
-        renderer.SetBackground(0, 0, 0)  # RGB background color
-        renderWindow.SetSize(1920, 1080)  # Window size
+        renderer.SetBackground(config.background_color[0], config.background_color[1], config.background_color[2])  # RGB background color
+        renderWindow.SetSize(config.window_resolution[0], config.window_resolution[1])  # Window size
         # Render and save frame
         renderWindow.Render()
         frame_filename = f"frame_{timestep}.png"
@@ -165,7 +165,7 @@ for index, row in data.iterrows():
 
     cnt += 1
 
-file_path = 'simulation_video.mp4'  # Replace with your file path
+file_path = f'{config.video_filename}.mp4'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -173,7 +173,7 @@ except FileNotFoundError:
 
 # Compile frames into a video
 clip = ImageSequenceClip(frames, fps=FPS)  # fps can be adjusted
-clip.write_videofile("simulation_video.mp4", codec="libx264")
+clip.write_videofile(f'{config.video_filename}.mp4', codec="libx264")
 renderWindowInteractor.Start()
 
 # Path where the files are located (assuming current directory for this example)
