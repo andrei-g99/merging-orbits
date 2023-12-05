@@ -104,15 +104,17 @@ renderWindow.AddRenderer(renderer)
 renderWindowInteractor = vtk.vtkRenderWindowInteractor()
 renderWindowInteractor.SetRenderWindow(renderWindow)
 
-#Set camera
-camera = vtk.vtkCamera()
-camera.SetPosition(config.camera_position[0], config.camera_position[1], config.camera_position[2])
-camera.SetFocalPoint(config.camera_direction[0], config.camera_direction[1], config.camera_direction[2])
-renderer.SetActiveCamera(camera)
+# Set camera
+# Comment this section for default behaviour
+
+# camera = vtk.vtkCamera()
+# camera.SetPosition(config.camera_position[0], config.camera_position[1], config.camera_position[2])
+# camera.SetFocalPoint(config.camera_direction[0], config.camera_direction[1], config.camera_direction[2])
+# renderer.SetActiveCamera(camera)
 
 # Sphere source for glyphs
 sphereSource = vtk.vtkSphereSource()
-sphereSource.SetRadius(config.spheres_radius)  # Set the radius of the spheres
+sphereSource.SetRadius(config.spheres_default_radius)  # Set the radius of the spheres
 
 frames = []
 
@@ -125,27 +127,32 @@ for index, row in data.iterrows():
         points = vtk.vtkPoints()
         N = row['number_of_bodies']
         timestep = row['timestep']
+
+        scalars = vtk.vtkFloatArray()
         for i in range(int(N)):
             if row[f'body_{i}_status']:
                 x = float(row[f'body_{i}_pos_x'])
                 y = float(row[f'body_{i}_pos_y'])
                 z = float(row[f'body_{i}_pos_z'])
-                m = float(row[f'body_{i}_mass'])
-
+                r = float(row[f'body_{i}_radius'])
+                scalars.InsertNextValue(r)
                 points.InsertNextPoint(x, y, z)
         # Access data from each row with row['column_name']
         # For example, row['name'] or row['age'] if your columns are named 'name' and 'age'
 
         polydata = vtk.vtkPolyData()
         polydata.SetPoints(points)
+        polydata.GetPointData().SetScalars(scalars)
 
         glyphFilter = vtk.vtkGlyph3D()
         glyphFilter.SetSourceConnection(sphereSource.GetOutputPort())
         glyphFilter.SetInputData(polydata)
+        glyphFilter.SetScaleModeToScaleByScalar()
         glyphFilter.Update()
 
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInputConnection(glyphFilter.GetOutputPort())
+        mapper.SetScalarVisibility(False)
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
