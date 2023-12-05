@@ -10,6 +10,11 @@ init_box_length = config.init_box_length
 dt = config.dt
 N = config.N
 G = config.G
+matter_density = config.matter_density
+
+def massToRadius(m):
+    return ((m/matter_density) * (3/(4*np.pi)))**(1/3)
+
 
 def bodiesAlive():
     alive_index_list = []
@@ -35,18 +40,22 @@ def collisionsLoop():
                             # Collision detected between body i and j
                             # The body with smaller mass is eliminated
                             total_mass = k.mass + j.mass
-
-                            velocity_of_merger = ((k.mass) / (total_mass)) * k.velocity_history[-1] + ((j.mass) / (total_mass)) * j.velocity_history[-1]
-                            center_of_mass = ((k.mass) / (total_mass)) * k.position_history[-1] + ((j.mass) / (total_mass)) * j.position_history[-1]
+                            new_radius = massToRadius(total_mass)
+                            velocity_of_merger = (k.mass / total_mass) * k.velocity_history[-1] + (j.mass / total_mass) * j.velocity_history[-1]
+                            center_of_mass = (k.mass / total_mass) * k.position_history[-1] + (j.mass / total_mass) * j.position_history[-1]
                             if k.mass <= j.mass:
                                 k.alive = False
                                 j.velocity_history[-1] = velocity_of_merger
                                 j.position_history[-1] = center_of_mass
+                                j.mass = total_mass
+                                j.radius = new_radius
 
                             else:
                                 j.alive = False
                                 k.velocity_history[-1] = velocity_of_merger
                                 k.position_history[-1] = center_of_mass
+                                k.mass = total_mass
+                                k.radius = new_radius
 
 def gravityLoop():
     alive_index_list = bodiesAlive()
@@ -65,8 +74,10 @@ def gravityLoop():
                         position = i.position_history[-1] + velocity * dt
                         i.position_history.append(position)
     else:
-        position = body_list[alive_index_list[0]].position_history[-1] + body_list[alive_index_list[0]].velocity_history[-1] * dt
-        body_list[alive_index_list[0]].position_history.append(position)
+        if len(alive_index_list) > 0:
+            position = body_list[alive_index_list[0]].position_history[-1] + \
+                       body_list[alive_index_list[0]].velocity_history[-1] * dt
+            body_list[alive_index_list[0]].position_history.append(position)
 
 # Simulation loop
 for t in range(simulation_steps):
@@ -85,7 +96,7 @@ for t in range(simulation_steps):
         timestep_data.append(body.velocity_history[-1][0])
         timestep_data.append(body.velocity_history[-1][1])
         timestep_data.append(body.velocity_history[-1][2])
-        timestep_data.append(body.mass)
+        timestep_data.append(body.radius)
         timestep_data.append(body.alive)
 
     simulation_data.append(timestep_data)
@@ -102,7 +113,7 @@ with open(file_path, 'w', newline='') as file:
     header = ['timestep', 'number_of_bodies']
     for b in range(len(body_list)):
         header += [f'body_{b}_pos_x', f'body_{b}_pos_y', f'body_{b}_pos_z',
-                   f'body_{b}_vel_x', f'body_{b}_vel_y', f'body_{b}_vel_z', f'body_{b}_mass', f'body_{b}_status']
+                   f'body_{b}_vel_x', f'body_{b}_vel_y', f'body_{b}_vel_z', f'body_{b}_radius', f'body_{b}_status']
     writer.writerow(header)
 
     # Write the data
