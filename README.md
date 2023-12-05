@@ -11,7 +11,7 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 
 # How to run a simulation
 - Set the initial conditions and rendering options in config.py
-- Execute run.py
+- Execute simulator.py
 - Execute render.py
 
 # To do list
