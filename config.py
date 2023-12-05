@@ -19,15 +19,15 @@ def radius_to_mass(radius):
   return matter_density * np.pi * (4/3) * (radius**3)
 
 
-n = 10
+n = 100
 for i in range(n):
     # prepare random parameters
     x = init_box_length*np.random.uniform()
     y = init_box_length*np.random.uniform()
     z = init_box_length*np.random.uniform()
-    vx = 0.5*(np.random.uniform()-0.5)
-    vy = 0.5*(np.random.uniform()-0.5)
-    vz = 0.5*(np.random.uniform()-0.5)
+    vx = 5*(np.random.uniform()-0.5)
+    vy = 5*(np.random.uniform()-0.5)
+    vz = 5*(np.random.uniform()-0.5)
     r = 10*(np.random.uniform()) + 10
     m = radius_to_mass(r)
     # create new body
@@ -40,7 +40,7 @@ for i in range(n):
 
 N = len(body_list)  # Total number of bodies
 dt = 0.01
-simulation_steps = 50000
+simulation_steps = 5000
 
 data_filename = 'sim_data'
 
