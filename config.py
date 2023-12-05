@@ -14,7 +14,6 @@ def radius_to_mass(radius):
 
 G = 1               # Gravity constant
 matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
-N = 2              # Total number of bodies
 init_box_length = 1000
 body_list = []
 
@@ -32,6 +31,8 @@ body_list = []
 #   body_list.append(b)
 body_list.append(Body(np.array([0, 100, 0]), np.array([1, 0, 0]), 10, True))
 body_list.append(Body(np.array([0, 0, 0]), np.array([0, 0, 0]), 100, True))
+
+N = len(body_list) # Total number of bodies
 dt = 0.01
 simulation_steps = 50000
 
