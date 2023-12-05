@@ -104,6 +104,12 @@ renderWindow.AddRenderer(renderer)
 renderWindowInteractor = vtk.vtkRenderWindowInteractor()
 renderWindowInteractor.SetRenderWindow(renderWindow)
 
+#Set camera
+camera = vtk.vtkCamera()
+camera.SetPosition(-500, 0, 500)
+camera.SetFocalPoint(0, 0, 0)
+renderer.SetActiveCamera(camera)
+
 # Sphere source for glyphs
 sphereSource = vtk.vtkSphereSource()
 sphereSource.SetRadius(10)  # Set the radius of the spheres
