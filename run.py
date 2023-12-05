@@ -1,54 +1,58 @@
 import csv
 import numpy as np
 import os
+import config
 
-class Body:
-    def __init__(self, initial_position, initial_velocity, mass, alive_status=True, radius = 10):
-        self.position_history = [initial_position]
-        self.velocity_history = [initial_velocity]
-        self.radius = radius
-        self.mass = mass
-        self.alive = alive_status
-
-def radius_to_mass(radius):
-  return matter_density * np.pi * (4/3) * (radius**3)
-
-G = 1               # Gravity constant
-matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
-N = 10              # Total number of bodies
-init_box_length = 1000
-body_list = []
-
-for i in range(N):
-  #prepare random parameters
-  x = init_box_length*np.random.uniform()
-  y = init_box_length*np.random.uniform()
-  z = init_box_length*np.random.uniform()
-  vx = 0.0005*init_box_length*(np.random.uniform()-0.5)
-  vy = 0.0005*init_box_length*(np.random.uniform()-0.5)
-  vz = 0.0005*init_box_length*(np.random.uniform()-0.5)
-  m = 100*np.random.uniform()
-  #create new body
-  b = Body(np.array([x, y, z]), np.array([vx, vy, vz]), m, True)
-  body_list.append(b)
-
-dt = 0.01
-simulation_steps = 5000
 simulation_data = []
+simulation_steps = config.simulation_steps
+body_list = config.body_list
+init_box_length = config.init_box_length
+dt = config.dt
+N = config.N
+G = config.G
 
 for t in range(simulation_steps):
     for i in body_list:
-        # Compute total force due to other particles
-        for j in body_list:
-            if i != j:
-                distance_vector = j.position_history[-1] - i.position_history[-1]
-                acceleration_on_i = distance_vector * ((G * j.mass)/(np.linalg.norm(distance_vector)**3))
+        # Collision handler and bound check
+        if i.alive:
+            if np.linalg.norm(i.position_history[-1]) > init_box_length:
+                # Body out of sim bounds, eliminate from simulation
+                i.alive = False
+            else:
+                for j in body_list:
+                    if i != j and j.alive:
+                        distance_vector = j.position_history[-1] - i.position_history[-1]
+                        radius_sum = j.radius + i.radius
+                        if np.linalg.norm(distance_vector) < radius_sum:
+                            # Collision detected between body i and j
+                            # The body with smaller mass is eliminated
+                            total_mass = i.mass + j.mass
 
-                velocity = i.velocity_history[-1] + acceleration_on_i * dt
-                i.velocity_history.append(velocity)
+                            velocity_of_merger = ((i.mass)/(total_mass)) * i.velocity_history[-1] + ((j.mass)/(total_mass)) * j.velocity_history[-1]
+                            center_of_mass = ((i.mass)/(total_mass)) * i.position_history[-1] + ((j.mass)/(total_mass)) * j.position_history[-1]
+                            if i.mass <= j.mass:
+                                i.alive = False
+                                j.velocity_history[-1] = velocity_of_merger
+                                j.position_history[-1] = center_of_mass
 
-                position = i.position_history[-1] + velocity * dt
-                i.position_history.append(position)
+                            else:
+                                j.alive = False
+                                i.velocity_history[-1] = velocity_of_merger
+                                i.position_history[-1] = center_of_mass
+
+    for i in body_list:
+        # Propagate gravity dynamics
+        if i.alive:
+            for j in body_list:
+                if i != j and j.alive:
+                    distance_vector = j.position_history[-1] - i.position_history[-1]
+                    acceleration_on_i = distance_vector * ((G * j.mass) / (np.linalg.norm(distance_vector) ** 3))
+
+                    velocity = i.velocity_history[-1] + acceleration_on_i * dt
+                    i.velocity_history.append(velocity)
+
+                    position = i.position_history[-1] + velocity * dt
+                    i.position_history.append(position)
 
     # Collecting data at the current timestep
     timestep_data = []
