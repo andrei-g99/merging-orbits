@@ -28,7 +28,7 @@ def collisionsLoop():
     for k in body_list:
         # Collision handler and bound check
         if k.alive:
-            if np.linalg.norm(k.position_history[-1]) > init_box_length:
+            if np.linalg.norm(k.position_history[-1]) > 10*init_box_length:
                 # Body out of sim bounds, eliminate from simulation
                 k.alive = False
             else:
