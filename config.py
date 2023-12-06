@@ -10,7 +10,7 @@ class Body:
         self.alive = alive_status
 
 
-G = 0.2               # Gravity constant
+G = 0.1               # Gravity constant
 matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
 init_box_length = 1000
 body_list = []
@@ -20,7 +20,7 @@ def radius_to_mass(radius):
 
 
 n = 100
-for i in range(n):
+for i in range(n-1):
     # prepare random parameters
     x = init_box_length*np.random.uniform()
     y = init_box_length*np.random.uniform()
@@ -34,13 +34,15 @@ for i in range(n):
     b = Body(np.array([x, y, z]), np.array([vx, vy, vz]), m, True, r)
     body_list.append(b)
 
+sun = Body(np.array([0, 0, 0]), np.array([0, 0, 0]), radius_to_mass(60), True, 60)
+body_list.append(sun)
 # Uncomment below for a 2-body orbiting demo
 # body_list.append(Body(np.array([0, 100, 0]), np.array([1, 0, 0]), 10, True))
 # body_list.append(Body(np.array([0, 0, 0]), np.array([0, 0, 0]), 100, True))
 
 N = len(body_list)  # Total number of bodies
 dt = 0.01
-simulation_steps = 5000
+simulation_steps = 10000
 
 data_filename = 'sim_data'
 
@@ -49,8 +51,8 @@ data_filename = 'sim_data'
 # RENDERING CONFIGS
 
 FPS = 60
-video_duration = 10 # Seconds
-camera_position = [-1000, 0, 250] # Camera absolute position
+video_duration = 20  # Seconds
+camera_position = [-1000, 0, 250]  # Camera absolute position
 camera_direction = [0, 0, 0]  # Pointing direction (focal point)
 spheres_default_radius = 1
 sphere_color = [1, 1, 1]  # RGB spheres color
