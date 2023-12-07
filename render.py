@@ -110,6 +110,7 @@ renderWindowInteractor.SetRenderWindow(renderWindow)
 # camera = vtk.vtkCamera()
 # camera.SetPosition(config.camera_position[0], config.camera_position[1], config.camera_position[2])
 # camera.SetFocalPoint(config.camera_direction[0], config.camera_direction[1], config.camera_direction[2])
+# camera.SetClippingRange(config.nearclip, config.farclip)
 # renderer.SetActiveCamera(camera)
 
 # Sphere source for glyphs
