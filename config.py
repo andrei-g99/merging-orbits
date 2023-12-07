@@ -58,6 +58,8 @@ spheres_default_radius = 1
 sphere_color = [1, 1, 1]  # RGB spheres color
 background_color = [0, 0, 0]  # RGB background color
 window_resolution = [1920, 1080]  # Pixel resolution width x height
+nearclip = 0.1
+farclip = init_box_length * 20
 
 video_filename = 'simrun'
 # END RENDER CONFIGS
