@@ -2,12 +2,14 @@
 Multi-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
 
 # Setup
-- Create a new Anaconda3 virtual environment with Python version 3.9
+- Install Anaconda3 on your system
+- Create a new conda virtual environment with Python version 3.9:
 
 ```bash
 conda create -n mayavi_env python=3.9
 conda activate mayavi_env
 ```
+(or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
 
 - Install VTK:
 
