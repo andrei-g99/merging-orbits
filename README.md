@@ -10,8 +10,8 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 (If using windows powershell first run `conda init powershell`, restart the shell and try to activate the env)
 
 ```bash
-conda create -n condaenv python=3.10
-conda activate condaenv
+conda create -n merging_orbits_env python=3.10
+conda activate merging_orbits_env
 ```
 
 - Install all dependencies with PIP:
