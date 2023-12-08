@@ -7,7 +7,7 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 
 (or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
 
-(if using command line avoid windows powershell console but try to use Anaconda Prompt which is provided with anaconda3 installation)
+(If using windows powershell first run `conda init powershell`, restart the shell and try to activate the env)
 
 ```bash
 conda create -n condaenv python=3.10
