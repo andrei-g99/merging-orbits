@@ -3,7 +3,7 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 
 # Setup
 - Install Anaconda3 on your system
-- Create a new conda virtual environment with Python version 3.9:
+- Create a new conda virtual environment with Python version 3.10:
 
 ```bash
 conda create -n mayavi_env python=3.9
@@ -11,17 +11,10 @@ conda activate mayavi_env
 ```
 (or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
 
-- Install VTK:
-
-```bash
-  conda install -c conda-forge vtk
-```
-
 - Install all dependencies with PIP:
 
 ```bash
-pip install mayavi
-pip install PyQt5
+pip install vtk
 pip install numpy
 pip install Pandas
 pip install moviepy
