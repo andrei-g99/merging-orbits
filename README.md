@@ -10,6 +10,7 @@ conda create -n condaenv python=3.10
 conda activate condaenv
 ```
 (or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
+
 (if using command line avoid windows powershell console but try to use Anaconda Prompt which is provided with anaconda3 installation)
 
 - Install all dependencies with PIP:
