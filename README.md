@@ -1,5 +1,6 @@
 # merging-orbits
 Multi-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
+![Demo](https://github.com/andrei-g99/andrei-g99.github.io/blob/main/mergingorbits.png)
 
 # Setup
 - Install Anaconda3 on your system
