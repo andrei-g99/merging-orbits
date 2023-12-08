@@ -10,9 +10,9 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 - csv
 
 # How to run a simulation
-- Set the initial conditions and rendering options in config.py
-- Execute simulator.py
-- Execute render.py
+- Set the initial conditions and rendering options in **config.py**
+- Run **simulator.py**
+- Run **render.py**
 
 # To do list
 - Create collision handler
