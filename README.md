@@ -22,7 +22,6 @@ pip install mayavi
 pip install PyQt5
 pip install numpy
 pip install Pandas
-pip install csv
 pip install moviepy
 ```
 
