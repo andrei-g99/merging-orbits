@@ -6,8 +6,8 @@ Multi-body gravitational simulator where object collisions are handled by a simp
 - Create a new conda virtual environment with Python version 3.10:
 
 ```bash
-conda create -n mayavi_env python=3.9
-conda activate mayavi_env
+conda create -n condaenv python=3.10
+conda activate condaenv
 ```
 (or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
 
