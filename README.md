@@ -32,4 +32,6 @@ pip install moviepy
 - Tweaks and tests/experiments
 - TBD
 
+# Gallery
+
 ![Demo](https://github.com/andrei-g99/andrei-g99.github.io/blob/main/mergingorbits.png)
