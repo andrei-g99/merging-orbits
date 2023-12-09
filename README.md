@@ -33,6 +33,7 @@ pip install mayavi
 # To do list
 - Implement Barnes-Hut algorithm with octree
 - Implement some 3D spatial partitioning for collision detection
+- Run on GPU, may need to replace *simulator.py* with a program in another language like Rust
 - Tweaks and tests/experiments
 - TBD
 
