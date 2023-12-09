@@ -21,6 +21,7 @@ pip install vtk
 pip install numpy
 pip install Pandas
 pip install moviepy
+pip install mayavi
 ```
 
 # How to run a simulation
