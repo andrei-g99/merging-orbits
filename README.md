@@ -30,9 +30,8 @@ pip install mayavi
 - Run **render.py**
 
 # To do list
-- Create collision handler
-- Collision handler should look for bodies in space cells with a count of 2 or more bodies occupying them
-    - This avoids O(N^2) check for collisions over all bodies
+- Implement Barnes-Hut algorithm with octree
+- Implement some 3D spatial partitioning for collision detection
 - Tweaks and tests/experiments
 - TBD
 
