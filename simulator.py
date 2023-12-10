@@ -2,6 +2,8 @@ import csv
 import numpy as np
 import os
 import config
+from config import mass_to_radius
+from tqdm import tqdm
 
 simulation_data = []
 simulation_steps = config.simulation_steps
@@ -11,9 +13,6 @@ dt = config.dt
 N = config.N
 G = config.G
 matter_density = config.matter_density
-
-def massToRadius(m):
-    return ((m/matter_density) * (3/(4*np.pi)))**(1/3)
 
 
 def bodiesAlive():
@@ -40,7 +39,7 @@ def collisionsLoop():
                             # Collision detected between body i and j
                             # The body with smaller mass is eliminated
                             total_mass = k.mass + j.mass
-                            new_radius = massToRadius(total_mass)
+                            new_radius = mass_to_radius(total_mass)
                             velocity_of_merger = (k.mass / total_mass) * k.velocity_history[-1] + (j.mass / total_mass) * j.velocity_history[-1]
                             center_of_mass = (k.mass / total_mass) * k.position_history[-1] + (j.mass / total_mass) * j.position_history[-1]
                             if k.mass <= j.mass:
@@ -80,7 +79,7 @@ def gravityLoop():
             body_list[alive_index_list[0]].position_history.append(position)
 
 # Simulation loop
-for t in range(simulation_steps):
+for t in tqdm(range(simulation_steps), desc='Simulating'):
 
     collisionsLoop()
     gravityLoop()
@@ -117,6 +116,6 @@ with open(file_path, 'w', newline='') as file:
     writer.writerow(header)
 
     # Write the data
-    for row in simulation_data:
+    for row in tqdm(simulation_data, desc='Saving simulation data'):
         writer.writerow(row)
     print(f'{config.data_filename}.csv has been generated')
