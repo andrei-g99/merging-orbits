@@ -1,6 +1,8 @@
 import numpy as np
 
 # SIM CONFIGS
+
+
 class Body:
     def __init__(self, initial_position, initial_velocity, mass, alive_status=True, radius=10):
         self.position_history = [initial_position]
@@ -12,19 +14,24 @@ class Body:
 
 G = 0.1               # Gravity constant
 matter_density = 1  # Density such that: mass_of_particle = 4pi/3 radius^3 * matter_density
-init_box_length = 1000
+init_box_length = 2000
 body_list = []
 
+
 def radius_to_mass(radius):
-  return matter_density * np.pi * (4/3) * (radius**3)
+    return matter_density * np.pi * (4/3) * (radius**3)
+
+
+def mass_to_radius(m):
+    return ((m/matter_density) * (3/(4*np.pi)))**(1/3)
 
 
 n = 100
 for i in range(n-1):
     # prepare random parameters
-    x = init_box_length*np.random.uniform()
-    y = init_box_length*np.random.uniform()
-    z = init_box_length*np.random.uniform()
+    x = init_box_length*(np.random.uniform()-0.5)
+    y = init_box_length*(np.random.uniform()-0.5)
+    z = init_box_length*(np.random.uniform()-0.5)
     vx = 5*(np.random.uniform()-0.5)
     vy = 5*(np.random.uniform()-0.5)
     vz = 5*(np.random.uniform()-0.5)
@@ -52,7 +59,7 @@ data_filename = 'sim_data'
 
 FPS = 60
 video_duration = 20  # Seconds
-camera_position = [-1000, 0, 250]  # Camera absolute position
+camera_position = [-init_box_length*4, init_box_length/2, init_box_length/2]  # Camera absolute position
 camera_direction = [0, 0, 0]  # Pointing direction (focal point)
 spheres_default_radius = 1
 sphere_color = [1, 1, 1]  # RGB spheres color
