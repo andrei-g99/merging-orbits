@@ -1,7 +1,7 @@
 # merging-orbits
 N-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
 
-# Setup
+# Basic setup
 - Install Anaconda3 on your system
 - Create a new conda virtual environment with Python version 3.10:
 
@@ -25,15 +25,25 @@ pip install moviepy
 pip install mayavi
 ```
 
+# Optional setup for the GPU accelerated version only
+
+For the GPU accelerated version you must have an NVIDIA GPU with CUDA API version 11 support. [NVIDIA CUDA Toolkit DOWNLOAD](https://developer.nvidia.com/cuda-toolkit)
+- Download version 11 for your architecture
+- Reboot your system
+- Activate the conda env again and install the pycuda python library
+```
+pip install pycuda
+```
+- For the accelerated version run the `simulator_accel.py` script
+
 # How to run a simulation
 - Set the initial conditions and rendering options in **config.py**
-- Run **simulator.py**
+- Run **simulator.py** (**simulator_accel.py** for the GPU accelerated version)
 - Run **render.py**
 
 # To do list
 - Implement Barnes-Hut algorithm with octree
 - Implement some 3D spatial partitioning for collision detection
-- Run on GPU, may need to replace *simulator.py* with a program in another language like Rust
 - Tweaks and tests/experiments
 - TBD
 
