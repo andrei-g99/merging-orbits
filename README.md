@@ -34,6 +34,9 @@ For the GPU accelerated version you must have an NVIDIA GPU with CUDA API versio
 ```
 pip install pycuda
 ```
+
+( if you don't have Visual Studio installed you need to install it for the NVCC compiler and cl tool - install with the C/C++ toolkit - and remember to add the cl.exe directory C:\Program Files\Microsoft Visual Studio\2022\<yourversion>\VC\Tools\MSVC\<yourversion>\bin\Hostx64\x64 to PATH )
+
 - For the accelerated version run the `simulator_accel.py` script
 
 # How to run a simulation
