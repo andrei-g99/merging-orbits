@@ -26,7 +26,7 @@ def mass_to_radius(m):
     return ((m/matter_density) * (3/(4*np.pi)))**(1/3)
 
 
-n = 100
+n = 1000
 for i in range(n-1):
     # prepare random parameters
     x = init_box_length*(np.random.uniform()-0.5)
@@ -70,3 +70,6 @@ farclip = init_box_length * 20
 
 video_filename = 'simrun'
 # END RENDER CONFIGS
+
+# GPU Acceleration settings - Do NOT touch unless you need to adapt it to your GPU architecture
+threads_per_block = 256
