@@ -8,87 +8,98 @@ import config
 from config import mass_to_radius
 from tqdm import tqdm
 
-#  Accelerated version of simulator_cpu.py
-#  Your system must have CUDA Toolkit version 11 and a compatible GPU
+#  Accelerated version of simulator.py
+#  Your system must have CUDA Toolkit version 11 installed and a compatible GPU
+
+# GPU kernel def
+kernel_code = """
+
+struct Body {
+    float position[3];
+    float velocity[3];
+    float mass;
+    int alive;
+};
+
+__global__ void gravitySimulator(Body *bodies, Body *output, int N) {
+
+    // X threads are total force calculations in parallel for each body
+    // Y threads are partial force calculations in parallel for a specific body wrt the other N - 1 bodies
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.x * blockDim.x + threadIdx.y;
+
+    if (i < N) {
+        // Perform computation
+        // For example, compute norm of vector, raise it to 3rd power, etc.
+    }
+}
+
+}
+"""
+
+# Compile kernel code
+mod = SourceModule(kernel_code)
+func = mod.get_function("gravitySimulator")
+
 
 simulation_data = []
 simulation_steps = config.simulation_steps
-body_list = config.body_list
 init_box_length = config.init_box_length
 dt = config.dt
 N = config.N
 G = config.G
 matter_density = config.matter_density
+body_list = config.body_list
+threads_per_block = config.threads_per_block
 
+body_dtype = np.dtype([
+    ('position', np.float32, 3),
+    ('mass', np.float32),
+    ('alive', np.int32)
+])
 
-def bodiesAlive():
-    alive_index_list = []
-    for i in range(len(body_list)):
-        if body_list[i].alive:
-            alive_index_list.append(i)
-    return alive_index_list
+structured_array = np.empty(len(body_list), dtype=body_dtype)
 
-
-def collisionsLoop():
-    for k in body_list:
-        # Collision handler and bound check
-        if k.alive:
-            if np.linalg.norm(k.position_history[-1]) > 10*init_box_length:
-                # Body out of sim bounds, eliminate from simulation
-                k.alive = False
-            else:
-                for j in body_list:
-                    if k != j and j.alive:
-                        distance_vector = j.position_history[-1] - k.position_history[-1]
-                        radius_sum = j.radius + k.radius
-                        if np.linalg.norm(distance_vector) < radius_sum:
-                            # Collision detected between body i and j
-                            # The body with smaller mass is eliminated
-                            total_mass = k.mass + j.mass
-                            new_radius = mass_to_radius(total_mass)
-                            velocity_of_merger = (k.mass / total_mass) * k.velocity_history[-1] + (j.mass / total_mass) * j.velocity_history[-1]
-                            center_of_mass = (k.mass / total_mass) * k.position_history[-1] + (j.mass / total_mass) * j.position_history[-1]
-                            if k.mass <= j.mass:
-                                k.alive = False
-                                j.velocity_history[-1] = velocity_of_merger
-                                j.position_history[-1] = center_of_mass
-                                j.mass = total_mass
-                                j.radius = new_radius
-
-                            else:
-                                j.alive = False
-                                k.velocity_history[-1] = velocity_of_merger
-                                k.position_history[-1] = center_of_mass
-                                k.mass = total_mass
-                                k.radius = new_radius
-
-def gravityLoop():
-    alive_index_list = bodiesAlive()
-    if len(alive_index_list) > 1:
-        for i in body_list:
-            # Propagate gravity dynamics
-            if i.alive:
-                for j in body_list:
-                    if i != j and j.alive:
-                        distance_vector = j.position_history[-1] - i.position_history[-1]
-                        acceleration_on_i = distance_vector * ((G * j.mass) / (np.linalg.norm(distance_vector) ** 3))
-
-                        velocity = i.velocity_history[-1] + acceleration_on_i * dt
-                        i.velocity_history.append(velocity)
-
-                        position = i.position_history[-1] + velocity * dt
-                        i.position_history.append(position)
+# Initialize bodies
+for i, body in enumerate(body_list):
+    structured_array[i]['position'] = body.position_history[-1]
+    structured_array[i]['mass'] = body.mass
+    if body.alive:
+        structured_array[i]['alive'] = int(1)
     else:
-        if len(alive_index_list) > 0:
-            position = body_list[alive_index_list[0]].position_history[-1] + \
-                       body_list[alive_index_list[0]].velocity_history[-1] * dt
-            body_list[alive_index_list[0]].position_history.append(position)
+        structured_array[i]['alive'] = int(0)
 
 # Simulation loop
-for t in tqdm(range(simulation_steps), desc='Simulating'):
+for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
-    collisionsLoop()
-    gravityLoop()
+    # Prepare input data for GPU
+    input_data = structured_array
+    output_data = np.zeros_like(input_data)
+    input_gpu = cuda.mem_alloc(input_data.nbytes)
+    output_gpu = cuda.mem_alloc(output_data.nbytes)
+
+    # Transfer data to GPU
+    cuda.memcpy_htod(input_gpu, input_data)
+
+    # Calculate block and grid dimensions
+    block_size = (N, N - 1, 1)
+    grid_x = (len(structured_array) + (N * (N - 1) - 1)) // (N * (N - 1))
+    grid_size = (grid_x, 1, 1)
+
+    # Kernel execution
+    func(input_gpu, output_gpu, np.int32(len(structured_array)), block=block_size, grid=grid_size)
+
+    # Wait for kernel to finish
+    cuda.Context.synchronize()
+
+    # Retrieve
+    cuda.memcpy_dtoh(output_data, output_gpu)
+
+    print(output_data)
+
+    # Free GPU memory
+    input_gpu.free()
+    output_gpu.free()
 
     # Collecting data at the current timestep
     timestep_data = []
@@ -106,7 +117,7 @@ for t in tqdm(range(simulation_steps), desc='Simulating'):
 
     simulation_data.append(timestep_data)
 
-file_path = f'{config.data_filename}.csv'  # Replace with your file path
+file_path = f'{config.data_filename}_gpu_accel.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -124,4 +135,4 @@ with open(file_path, 'w', newline='') as file:
     # Write the data
     for row in tqdm(simulation_data, desc='Saving simulation data'):
         writer.writerow(row)
-    print(f'{config.data_filename}.csv has been generated')
+    print(f'{config.data_filename}_gpu_accel.csv has been generated')
