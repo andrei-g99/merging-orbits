@@ -6,37 +6,39 @@ with open('config.json', 'r') as config_file:
 N = config['simulation']['number_of_bodies'];
 
 
-kernel_code_template = """
+kernel_code = """
 
 #define M_PI 3.141592653589793238462
 
-struct vec3 {
+struct vec3 {{
     float x;
     float y;
     float z;
-};
+}};
 
-struct Body {
+struct Body {{
     float position[3];
     float velocity[3];
     float radius;
     float mass;
     int alive;
-    float accel_due_to[{N}][3];
-};
+    float accel_due_to[{0}][3];
+}};
 
-__global__ void gravitySimulator(Body *bodies, Body *output, int N) {
+__global__ void gravitySimulator(Body *bodies, Body *output, int N) {{
 
     float G = 0.1;
     int i = blockIdx.x * blockDim.x + threadIdx.y;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
 
     if ( i < N && j < N)
-    {
+    {{
+        float m_i = bodies[i].mass;
+        float m_j = bodies[j].mass;
 
         //detect collisions
         if (i != j && bodies[j].alive == 1)
-        {
+        {{
             vec3 distance;
             distance.x = bodies[j].position[0] - bodies[i].position[0];
             distance.y = bodies[j].position[1] - bodies[i].position[1];
@@ -44,35 +46,27 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
             float dist_norm = norm3df(distance.x, distance.y, distance.z);
 
             //detect collisions
-            float radius_sum = m_j.radius + m_i.radius;
+            float radius_sum = bodies[j].radius + bodies[i].radius;
             if (dist_norm < radius_sum)
-            {
+            {{
                 //collision has been detected between i and j bodies
                 // The body with smaller mass is set to dead
-                float m_i = bodies[i].mass;
-                float m_j = bodies[j].mass;
                 float total_mass = m_j + m_i;
                 float new_radius = powf( total_mass * (3/(4*M_PI)), 1/3);
 
                 
                 vec3 velocity_of_merger;
-                velocity_of_merger.x = (m_i / total_mass) * bodies[i].velocity[0]
-                                        + (m_j / total_mass) * bodies[j].velocity[0];
-                velocity_of_merger.y = (m_i / total_mass) * bodies[i].velocity[1]
-                                        + (m_j / total_mass) * bodies[j].velocity[1];
-                velocity_of_merger.z = (m_i / total_mass) * bodies[i].velocity[2]
-                                        + (m_j / total_mass) * bodies[j].velocity[2];
+                velocity_of_merger.x = (m_i / total_mass) * bodies[i].velocity[0] + (m_j / total_mass) * bodies[j].velocity[0];
+                velocity_of_merger.y = (m_i / total_mass) * bodies[i].velocity[1] + (m_j / total_mass) * bodies[j].velocity[1];
+                velocity_of_merger.z = (m_i / total_mass) * bodies[i].velocity[2] + (m_j / total_mass) * bodies[j].velocity[2];
 
                 vec3 center_of_mass;
-                center_of_mass.x = (m_i / total_mass) * bodies[i].position[0]
-                                        + (m_j / total_mass) * bodies[j].position[0];
-                center_of_mass.y = (m_i / total_mass) * bodies[i].position[1]
-                                        + (m_j / total_mass) * bodies[j].position[1];
-                center_of_mass.z = (m_i / total_mass) * bodies[i].position[2]
-                                        + (m_j / total_mass) * bodies[j].position[2];
+                center_of_mass.x = (m_i / total_mass) * bodies[i].position[0] + (m_j / total_mass) * bodies[j].position[0];
+                center_of_mass.y = (m_i / total_mass) * bodies[i].position[1] + (m_j / total_mass) * bodies[j].position[1];
+                center_of_mass.z = (m_i / total_mass) * bodies[i].position[2] + (m_j / total_mass) * bodies[j].position[2];
 
                 if ( m_i <= m_j )
-                {
+                {{
                     output[i].alive = 0;
                     output[i].velocity[0] = velocity_of_merger.x;
                     output[i].velocity[1] = velocity_of_merger.y;
@@ -92,9 +86,9 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
                     output[j].position[2] = center_of_mass.z;
                     output[j].mass = total_mass;
                     output[j].radius = new_radius;
-                }
+                }}
                 else
-                {
+                {{
                     output[j].alive = 0;
                     output[j].velocity[0] = velocity_of_merger.x;
                     output[j].velocity[1] = velocity_of_merger.y;
@@ -114,10 +108,10 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
                     output[i].position[2] = center_of_mass.z;
                     output[i].mass = total_mass;
                     output[i].radius = new_radius;
-                }
+                }}
                 
                                         
-            }
+            }}
 
 
             // Compute forces
@@ -133,9 +127,8 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
             acceleration_ji.y = (-distance.y) * part_j;
             acceleration_ji.z = (-distance.z) * part_j;
 
-            accelOut[j] = acceleration_ij;
             if(i == j)
-            {
+            {{
                 output[i].accel_due_to[j][0] = 0;
                 output[i].accel_due_to[j][1] = 0;
                 output[i].accel_due_to[j][2] = 0;
@@ -143,9 +136,9 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
                 output[j].accel_due_to[i][0] = 0;
                 output[j].accel_due_to[i][1] = 0;
                 output[j].accel_due_to[i][2] = 0;
-            }
+            }}
             else
-            {
+            {{
             
                 output[i].accel_due_to[j][0] = acceleration_ij.x;
                 output[i].accel_due_to[j][1] = acceleration_ij.y;
@@ -155,19 +148,15 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
                 output[j].accel_due_to[i][1] = acceleration_ji.y;
                 output[j].accel_due_to[i][2] = acceleration_ji.z;
 
-            }
-        }
+            }}
+        }}
 
 
 
 
 
-    }
+    }}
 
 
-}
-
-}
-"""
-
-kernel_code = kernel_code_template.format(N=N)
+}}
+""".format(N)

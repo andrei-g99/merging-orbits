@@ -79,9 +79,10 @@ simulation_data = []
 
 body_dtype = np.dtype([
     ('position', np.float32, 3),
+    ('velocity', np.float32, 3),
     ('radius', np.float32),
     ('mass', np.float32),
-    ('alive', np.int32)
+    ('alive', np.int32),
     ('accel_due_to', np.float32, (N, 3))
 ])
 
@@ -90,6 +91,7 @@ structured_array = np.empty(len(body_list), dtype=body_dtype)
 # Initialize bodies
 for i, body in enumerate(body_list):
     structured_array[i]['position'] = body.position_history[-1]
+    structured_array[i]['velocity'] = body.velocity_history[-1]
     structured_array[i]['mass'] = body.mass
     structured_array[i]['radius'] = body.radius
     if body.alive:
@@ -106,22 +108,37 @@ for i, body in enumerate(body_list):
 # Simulation loop
 for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
+    for i, body in enumerate(body_list):
+        structured_array[i]['position'] = body.position_history[-1]
+        structured_array[i]['velocity'] = body.velocity_history[-1]
+        structured_array[i]['mass'] = body.mass
+        structured_array[i]['radius'] = body.radius
+        if body.alive:
+            structured_array[i]['alive'] = int(1)
+        else:
+            structured_array[i]['alive'] = int(0)
+        
+        for k in range(N):
+            structured_array[i]['accel_due_to'][k][0] = 0
+            structured_array[i]['accel_due_to'][k][1] = 0
+            structured_array[i]['accel_due_to'][k][2] = 0
+
     # Prepare input data for GPU
     input_data = structured_array
-    output_body_data = np.zeros_like(input_data)
+    output_data = np.zeros_like(input_data)
     input_gpu = cuda.mem_alloc(input_data.nbytes)
-    output_body_gpu = cuda.mem_alloc(output_body_data.nbytes)
+    output_gpu = cuda.mem_alloc(output_data.nbytes)
 
     # Transfer data to GPU
     cuda.memcpy_htod(input_gpu, input_data)
 
     # Calculate block and grid dimensions
-    block_size = (math.sqrt(threads_per_block), math.sqrt(threads_per_block), 1)
+    block_size = (int(math.sqrt(threads_per_block)), int(math.sqrt(threads_per_block)), 1)
     grid_x = math.ceil(len(structured_array) / threads_per_block)
     grid_size = (grid_x, 1, 1)
 
     # Kernel execution
-    func(input_gpu, output_body_gpu, np.int32(len(structured_array)), block=block_size, grid=grid_size)
+    func(input_gpu, output_gpu, np.int32(len(structured_array)), block=block_size, grid=grid_size)
 
     # Wait for kernel to finish
     cuda.Context.synchronize()
@@ -129,11 +146,21 @@ for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
     # Retrieve
     cuda.memcpy_dtoh(output_data, output_gpu)
 
-    print(output_data)
 
     # Free GPU memory
     input_gpu.free()
     output_gpu.free()
+
+    for i in range(len(output_data)):
+        total_accel = np.array([0, 0, 0], np.float32)
+        for k in range(N):
+            total_accel += np.array([output_data[i]['accel_due_to'][k][0], output_data[i]['accel_due_to'][k][1], output_data[i]['accel_due_to'][k][2]], np.float32)
+        body_list[i].position_history.append(output_data[i]['position'])
+        body_list[i].velocity_history.append(output_data[i]['velocity'])
+        body_list[i].mass = output_data[i]['mass']
+        body_list[i].radius = output_data[i]['radius']
+        body_list[i].alive = output_data[i]['alive']
+
 
     # Collecting data at the current timestep
     timestep_data = []
@@ -151,7 +178,7 @@ for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
     simulation_data.append(timestep_data)
 
-file_path = f'./../{data_filename}_gpu_accel.csv'  # Replace with your file path
+file_path = f'{data_filename}_gpu_accel.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:

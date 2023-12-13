@@ -28,7 +28,7 @@
 
     "acceleration_settings":{
 
-        "threads_per_block": 512
+        "threads_per_block": 256
 
     }
 }
