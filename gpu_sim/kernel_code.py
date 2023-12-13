@@ -77,10 +77,10 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
                     output[i].velocity[0] = velocity_of_merger.x;
                     output[i].velocity[1] = velocity_of_merger.y;
                     output[i].velocity[2] = velocity_of_merger.z;
-i                   output[i].position[0] = center_of_mass.x;
+                    output[i].position[0] = center_of_mass.x;
                     output[i].position[1] = center_of_mass.y;
                     output[i].position[2] = center_of_mass.z;
-i                   output[i].mass = total_mass;
+                    output[i].mass = total_mass;
                     output[i].radius = new_radius;
 
                     output[j].alive = 1;
