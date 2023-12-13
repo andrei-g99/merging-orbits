@@ -6,7 +6,7 @@ import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 import os
 import json
-from tqdm import tqdm 
+from tqdm import tqdm
 
 #  Accelerated version of simulator.py
 #  Your system must have CUDA Toolkit version 11 installed and a compatible GPU
