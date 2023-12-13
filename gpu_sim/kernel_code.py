@@ -1,4 +1,12 @@
-kernel_code = """
+import json
+
+with open('config.json', 'r') as config_file:
+    config = json.load(config_file)
+
+N = config['simulation']['number_of_bodies'];
+
+
+kernel_code_template = """
 
 #define M_PI 3.141592653589793238462
 
@@ -14,23 +22,25 @@ struct Body {
     float radius;
     float mass;
     int alive;
+    float accel_due_to[{N}][3];
 };
 
-__device__ void subRoutine(Body *bodies, int i, int N, vec3 *accelOut) {
-    
+__global__ void gravitySimulator(Body *bodies, Body *output, int N) {
+
     float G = 0.1;
+    int i = blockIdx.x * blockDim.x + threadIdx.y;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
 
     if ( i < N && j < N)
     {
 
         //detect collisions
-        if (i != j && Body[j].alive == 1)
+        if (i != j && bodies[j].alive == 1)
         {
             vec3 distance;
-            distance.x = Body[j].position[0] - Body[i].position[0];
-            distance.y = Body[j].position[1] - Body[i].position[1];
-            distance.z = Body[j].position[2] - Body[i].position[2];   
+            distance.x = bodies[j].position[0] - bodies[i].position[0];
+            distance.y = bodies[j].position[1] - bodies[i].position[1];
+            distance.z = bodies[j].position[2] - bodies[i].position[2];   
             float dist_norm = norm3df(distance.x, distance.y, distance.z);
 
             //detect collisions
@@ -39,57 +49,71 @@ __device__ void subRoutine(Body *bodies, int i, int N, vec3 *accelOut) {
             {
                 //collision has been detected between i and j bodies
                 // The body with smaller mass is set to dead
-                float m_i = Body[i].mass;
-                float m_j = Body[j].mass;
+                float m_i = bodies[i].mass;
+                float m_j = bodies[j].mass;
                 float total_mass = m_j + m_i;
                 float new_radius = powf( total_mass * (3/(4*M_PI)), 1/3);
 
                 
                 vec3 velocity_of_merger;
-                velocity_of_merger.x = (m_i / total_mass) * Body[i].velocity[0]
-                                        + (m_j / total_mass) * Body[j].velocity[0];
-                velocity_of_merger.y = (m_i / total_mass) * Body[i].velocity[1]
-                                        + (m_j / total_mass) * Body[j].velocity[1];
-                velocity_of_merger.z = (m_i / total_mass) * Body[i].velocity[2]
-                                        + (m_j / total_mass) * Body[j].velocity[2];
+                velocity_of_merger.x = (m_i / total_mass) * bodies[i].velocity[0]
+                                        + (m_j / total_mass) * bodies[j].velocity[0];
+                velocity_of_merger.y = (m_i / total_mass) * bodies[i].velocity[1]
+                                        + (m_j / total_mass) * bodies[j].velocity[1];
+                velocity_of_merger.z = (m_i / total_mass) * bodies[i].velocity[2]
+                                        + (m_j / total_mass) * bodies[j].velocity[2];
 
                 vec3 center_of_mass;
-                center_of_mass.x = (m_i / total_mass) * Body[i].position[0]
-                                        + (m_j / total_mass) * Body[j].position[0];
-                center_of_mass.y = (m_i / total_mass) * Body[i].position[1]
-                                        + (m_j / total_mass) * Body[j].position[1];
-                center_of_mass.z = (m_i / total_mass) * Body[i].position[2]
-                                        + (m_j / total_mass) * Body[j].position[2];
+                center_of_mass.x = (m_i / total_mass) * bodies[i].position[0]
+                                        + (m_j / total_mass) * bodies[j].position[0];
+                center_of_mass.y = (m_i / total_mass) * bodies[i].position[1]
+                                        + (m_j / total_mass) * bodies[j].position[1];
+                center_of_mass.z = (m_i / total_mass) * bodies[i].position[2]
+                                        + (m_j / total_mass) * bodies[j].position[2];
 
                 if ( m_i <= m_j )
                 {
-                    Body[i].alive = 0;
+                    output[i].alive = 0;
+                    output[i].velocity[0] = velocity_of_merger.x;
+                    output[i].velocity[1] = velocity_of_merger.y;
+                    output[i].velocity[2] = velocity_of_merger.z;
+i                   output[i].position[0] = center_of_mass.x;
+                    output[i].position[1] = center_of_mass.y;
+                    output[i].position[2] = center_of_mass.z;
+i                   output[i].mass = total_mass;
+                    output[i].radius = new_radius;
 
-                    Body[j].velocity[0] = velocity_of_merger.x;
-                    Body[j].velocity[1] = velocity_of_merger.y;
-                    Body[j].velocity[2] = velocity_of_merger.z;
-
-                    Body[j].position[0] = center_of_mass.x;
-                    Body[j].position[1] = center_of_mass.y;
-                    Body[j].position[2] = center_of_mass.z;
-
-                    Body[j].mass = total_mass;
-                    Body[j].radius = new_radius;
+                    output[j].alive = 1;
+                    output[j].velocity[0] = velocity_of_merger.x;
+                    output[j].velocity[1] = velocity_of_merger.y;
+                    output[j].velocity[2] = velocity_of_merger.z;
+                    output[j].position[0] = center_of_mass.x;
+                    output[j].position[1] = center_of_mass.y;
+                    output[j].position[2] = center_of_mass.z;
+                    output[j].mass = total_mass;
+                    output[j].radius = new_radius;
                 }
                 else
                 {
-                    Body[j].alive = 0;
+                    output[j].alive = 0;
+                    output[j].velocity[0] = velocity_of_merger.x;
+                    output[j].velocity[1] = velocity_of_merger.y;
+                    output[j].velocity[2] = velocity_of_merger.z;
+                    output[j].position[0] = center_of_mass.x;
+                    output[j].position[1] = center_of_mass.y;
+                    output[j].position[2] = center_of_mass.z;
+                    output[j].mass = total_mass;
+                    output[j].radius = new_radius;
 
-                    Body[i].velocity[0] = velocity_of_merger.x;
-                    Body[i].velocity[1] = velocity_of_merger.y;
-                    Body[i].velocity[2] = velocity_of_merger.z;
-
-                    Body[i].position[0] = center_of_mass.x;
-                    Body[i].position[1] = center_of_mass.y;
-                    Body[i].position[2] = center_of_mass.z;
-
-                    Body[i].mass = total_mass;
-                    Body[i].radius = new_radius;
+                    output[i].alive = 1;
+                    output[i].velocity[0] = velocity_of_merger.x;
+                    output[i].velocity[1] = velocity_of_merger.y;
+                    output[i].velocity[2] = velocity_of_merger.z;
+                    output[i].position[0] = center_of_mass.x;
+                    output[i].position[1] = center_of_mass.y;
+                    output[i].position[2] = center_of_mass.z;
+                    output[i].mass = total_mass;
+                    output[i].radius = new_radius;
                 }
                 
                                         
@@ -98,31 +122,52 @@ __device__ void subRoutine(Body *bodies, int i, int N, vec3 *accelOut) {
 
             // Compute forces
             vec3 acceleration_ij;
-            float part = ((G * m_j) / (powf(dist_norm, 3)));
-            acceleration_ij.x = distance.x * part;
-            acceleration_ij.y = distance.y * part;
-            acceleration_ij.z = distance.z * part;
+            vec3 acceleration_ji;
+            float part_i = ((G * m_j) / (powf(dist_norm, 3)));
+            float part_j = ((G * m_i) / (powf(dist_norm, 3)));
+            acceleration_ij.x = distance.x * part_i;
+            acceleration_ij.y = distance.y * part_i;
+            acceleration_ij.z = distance.z * part_i;
+
+            acceleration_ji.x = (-distance.x) * part_j;
+            acceleration_ji.y = (-distance.y) * part_j;
+            acceleration_ji.z = (-distance.z) * part_j;
 
             accelOut[j] = acceleration_ij;
+            if(i == j)
+            {
+                output[i].accel_due_to[j][0] = 0;
+                output[i].accel_due_to[j][1] = 0;
+                output[i].accel_due_to[j][2] = 0;
 
+                output[j].accel_due_to[i][0] = 0;
+                output[j].accel_due_to[i][1] = 0;
+                output[j].accel_due_to[i][2] = 0;
+            }
+            else
+            {
+            
+                output[i].accel_due_to[j][0] = acceleration_ij.x;
+                output[i].accel_due_to[j][1] = acceleration_ij.y;
+                output[i].accel_due_to[j][2] = acceleration_ij.z;
+
+                output[j].accel_due_to[i][0] = acceleration_ji.x;
+                output[j].accel_due_to[i][1] = acceleration_ji.y;
+                output[j].accel_due_to[i][2] = acceleration_ji.z;
+
+            }
         }
 
 
+
+
+
     }
 
 
-}
-
-__global__ void gravitySimulator(Body *bodies, Body *output, int N) {
-
-    // X threads are total force calculations in parallel for each body
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    vec3 accelOut[N];
-
-    if (i < N) {
-        subRoutine<<<gridDim, blockDim>>>(bodies, i, N, accelOut);
-    }
 }
 
 }
 """
+
+kernel_code = kernel_code_template.format(N=N)

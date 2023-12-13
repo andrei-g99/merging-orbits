@@ -82,6 +82,7 @@ body_dtype = np.dtype([
     ('radius', np.float32),
     ('mass', np.float32),
     ('alive', np.int32)
+    ('accel_due_to', np.float32, (N, 3))
 ])
 
 structured_array = np.empty(len(body_list), dtype=body_dtype)
@@ -95,26 +96,32 @@ for i, body in enumerate(body_list):
         structured_array[i]['alive'] = int(1)
     else:
         structured_array[i]['alive'] = int(0)
+    
+    for k in range(N):
+        structured_array[i]['accel_due_to'][k][0] = 0
+        structured_array[i]['accel_due_to'][k][1] = 0
+        structured_array[i]['accel_due_to'][k][2] = 0
+
 
 # Simulation loop
 for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
     # Prepare input data for GPU
     input_data = structured_array
-    output_data = np.zeros_like(input_data)
+    output_body_data = np.zeros_like(input_data)
     input_gpu = cuda.mem_alloc(input_data.nbytes)
-    output_gpu = cuda.mem_alloc(output_data.nbytes)
+    output_body_gpu = cuda.mem_alloc(output_body_data.nbytes)
 
     # Transfer data to GPU
     cuda.memcpy_htod(input_gpu, input_data)
 
     # Calculate block and grid dimensions
-    block_size = (threads_per_block, 1, 1)
+    block_size = (math.sqrt(threads_per_block), math.sqrt(threads_per_block), 1)
     grid_x = math.ceil(len(structured_array) / threads_per_block)
     grid_size = (grid_x, 1, 1)
 
     # Kernel execution
-    func(input_gpu, output_gpu, np.int32(len(structured_array)), block=block_size, grid=grid_size)
+    func(input_gpu, output_body_gpu, np.int32(len(structured_array)), block=block_size, grid=grid_size)
 
     # Wait for kernel to finish
     cuda.Context.synchronize()
