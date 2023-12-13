@@ -81,7 +81,7 @@ def WriteImage(fileName, renWin, rgba=True):
         raise RuntimeError('Need a filename.')
 
 
-data = pd.read_csv(f'{config.data_filename}.csv')
+data = pd.read_csv(f'./../{config.data_filename}.csv')
 
 # Controlling FPS and time: FPS * video_duration(seconds) = sim_timesteps
 # e.g. FPS = 60 and video_duration = 10
@@ -174,7 +174,7 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
     cnt += 1
 
-file_path = f'{config.video_filename}.mp4'  # Replace with your file path
+file_path = f'./../{config.video_filename}.mp4'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
