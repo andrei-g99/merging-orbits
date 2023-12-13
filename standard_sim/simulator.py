@@ -155,7 +155,7 @@ for t in tqdm(range(simulation_steps), desc='Simulating'):
 
     simulation_data.append(timestep_data)
 
-file_path = f'./../{data_filename}.csv'  # Replace with your file path
+file_path = f'{data_filename}.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:

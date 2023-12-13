@@ -5,6 +5,8 @@ __pycache__/
 __pycache__/*
 *.pyc
 *.pyo
+*.mp4
+*.csv
 
 # IDE-specific files/directories
 .vscode/
