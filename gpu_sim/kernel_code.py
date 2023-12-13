@@ -16,7 +16,7 @@ struct Body {
     int alive;
 };
 
-__global__ void subRoutine(Body *bodies, int i, int N, vec3 *accelOut) {
+__device__ void subRoutine(Body *bodies, int i, int N, vec3 *accelOut) {
     
     float G = 0.1;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -120,7 +120,7 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {
     vec3 accelOut[N];
 
     if (i < N) {
-        subRoutine(bodies, i, N, accelOut);
+        subRoutine<<<gridDim, blockDim>>>(bodies, i, N, accelOut);
     }
 }
 

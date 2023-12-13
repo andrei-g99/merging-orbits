@@ -1,0 +1,34 @@
+{
+    "simulation":{
+
+        "number_of_bodies": 100,
+        "matter_density": 1,
+        "gravity_constant": 0.1,
+        "init_box_length": 1250,
+        "simulation_steps": 10000,
+        "sizeof_timestep": 0.01,
+        "data_filename": "sim_data"
+
+    },
+
+    "rendering":{
+
+        "fps": 60,
+        "video_duration": 10,
+        "camera_position": [-4000, 500, 500],
+        "camera_direction": [0, 0, 0],
+        "nearclip": 0.1,
+        "farclip": 20000,
+        "spheres_default_radius": 1,
+        "sphere_color_rgb": [1, 1, 1],
+        "background_color_rgb": [0, 0, 0],
+        "window_resolution": [1920, 1080],
+        "video_filename": "sim_clip"
+    },
+
+    "acceleration_settings":{
+
+        "threads_per_block": 256
+
+    }
+}

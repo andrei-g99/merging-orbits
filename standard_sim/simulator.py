@@ -1,19 +1,70 @@
 import csv
 import numpy as np
 import os
-import config
-from config import mass_to_radius
 from tqdm import tqdm
+import json
+import numpy as np
+
+with open('config.json', 'r') as config_file:
+    config = json.load(config_file)
+
+matter_density = config['simulation']['matter_density'];
+G = config['simulation']['gravity_constant'];
+init_box_length = config['simulation']['init_box_length'];
+matter_density = config['simulation']['matter_density'];
+N = config['simulation']['number_of_bodies'];
+simulation_steps = config['simulation']['simulation_steps'];
+dt = config['simulation']['sizeof_timestep'];
+data_filename = config['simulation']['data_filename'];
+
+# SIM CONFIGS
+
+
+class Body:
+    def __init__(self, initial_position, initial_velocity, mass, alive_status=True, radius=10):
+        self.position_history = [initial_position]
+        self.velocity_history = [initial_velocity]
+        self.radius = radius
+        self.mass = mass
+        self.alive = alive_status
+
+
+body_list = []
+
+
+def radius_to_mass(radius):
+    return matter_density * np.pi * (4/3) * (radius**3)
+
+
+def mass_to_radius(m):
+    return ((m/matter_density) * (3/(4*np.pi)))**(1/3)
+
+
+for i in range(N-1):
+    # prepare random parameters
+    x = init_box_length*(np.random.uniform()-0.5)
+    y = init_box_length*(np.random.uniform()-0.5)
+    z = init_box_length*(np.random.uniform()-0.5)
+    vx = 5*(np.random.uniform()-0.5)
+    vy = 5*(np.random.uniform()-0.5)
+    vz = 5*(np.random.uniform()-0.5)
+    r = 10*(np.random.uniform()) + 10
+    m = radius_to_mass(r)
+    # create new body
+    b = Body(np.array([x, y, z]), np.array([vx, vy, vz]), m, True, r)
+    body_list.append(b)
+
+sun = Body(np.array([0, 0, 0]), np.array([0, 0, 0]), radius_to_mass(60), True, 60)
+body_list.append(sun)
+# Uncomment below for a 2-body orbiting demo
+# body_list.append(Body(np.array([0, 100, 0]), np.array([1, 0, 0]), 10, True))
+# body_list.append(Body(np.array([0, 0, 0]), np.array([0, 0, 0]), 100, True))
+
+
+# END SIM CONFIGS
+
 
 simulation_data = []
-simulation_steps = config.simulation_steps
-body_list = config.body_list
-init_box_length = config.init_box_length
-dt = config.dt
-N = config.N
-G = config.G
-matter_density = config.matter_density
-
 
 def bodiesAlive():
     alive_index_list = []
@@ -104,7 +155,7 @@ for t in tqdm(range(simulation_steps), desc='Simulating'):
 
     simulation_data.append(timestep_data)
 
-file_path = f'./../{config.data_filename}.csv'  # Replace with your file path
+file_path = f'./../{data_filename}.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -122,4 +173,4 @@ with open(file_path, 'w', newline='') as file:
     # Write the data
     for row in tqdm(simulation_data, desc='Saving simulation data'):
         writer.writerow(row)
-    print(f'{config.data_filename}.csv has been generated')
+    print(f'{data_filename}.csv has been generated')

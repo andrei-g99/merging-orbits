@@ -1,5 +1,5 @@
 import os
-import config
+import json
 import numpy as np
 import mayavi.mlab as mlab
 import math
@@ -81,14 +81,30 @@ def WriteImage(fileName, renWin, rgba=True):
         raise RuntimeError('Need a filename.')
 
 
-data = pd.read_csv(f'./../{config.data_filename}.csv')
+with open('config.json', 'r') as config_file:
+    config = json.load(config_file)
+
+data_filename = config['simulation']['data_filename'];
+init_box_length = config['simulation']['init_box_length'];
+FPS = config['rendering']['fps'];
+camera_position = config['rendering']['camera_position'];
+camera_direction = config['rendering']['camera_direction'];
+video_duration = config['rendering']['video_duration'];
+nearclip = config['rendering']['nearclip'];
+farclip = config['rendering']['farclip'];
+spheres_default_radius = config['rendering']['spheres_default_radius'];
+sphere_color = config['rendering']['sphere_color_rgb'];
+background_color = config['rendering']['background_color_rgb'];
+window_resolution = config['rendering']['window_resolution'];
+video_filename = config['rendering']['video_filename'];
+
+
+data = pd.read_csv(f'./../{data_filename}.csv')
 
 # Controlling FPS and time: FPS * video_duration(seconds) = sim_timesteps
 # e.g. FPS = 60 and video_duration = 10
 # sim_timesteps = 600, we need to sample only 600 timesteps regardless of how many the simulation provides!
 
-FPS = config.FPS
-video_duration = config.video_duration
 steps_to_sample = FPS*video_duration
 total_timesteps = len(data['timestep'])
 
@@ -109,14 +125,14 @@ renderWindowInteractor.SetRenderWindow(renderWindow)
 # Comment this section for default behaviour
 
 camera = vtk.vtkCamera()
-camera.SetPosition(config.camera_position[0], config.camera_position[1], config.camera_position[2])
-camera.SetFocalPoint(config.camera_direction[0], config.camera_direction[1], config.camera_direction[2])
-camera.SetClippingRange(config.nearclip, config.farclip)
+camera.SetPosition(camera_position[0], camera_position[1], camera_position[2])
+camera.SetFocalPoint(camera_direction[0], camera_direction[1], camera_direction[2])
+camera.SetClippingRange(nearclip, farclip)
 renderer.SetActiveCamera(camera)
 
 # Sphere source for glyphs
 sphereSource = vtk.vtkSphereSource()
-sphereSource.SetRadius(config.spheres_default_radius)  # Set the radius of the spheres
+sphereSource.SetRadius(spheres_default_radius)  # Set the radius of the spheres
 
 frames = []
 
@@ -158,11 +174,11 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(config.sphere_color[0], config.sphere_color[1], config.sphere_color[2])
+        actor.GetProperty().SetColor(sphere_color[0], sphere_color[1], sphere_color[2])
         renderer.AddActor(actor)
 
-        renderer.SetBackground(config.background_color[0], config.background_color[1], config.background_color[2])  # RGB background color
-        renderWindow.SetSize(config.window_resolution[0], config.window_resolution[1])  # Window size
+        renderer.SetBackground(background_color[0], background_color[1], background_color[2])  # RGB background color
+        renderWindow.SetSize(window_resolution[0], window_resolution[1])  # Window size
         # Render and save frame
         renderWindow.Render()
         frame_filename = f"frame_{timestep}.png"
@@ -174,7 +190,7 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
     cnt += 1
 
-file_path = f'./../{config.video_filename}.mp4'  # Replace with your file path
+file_path = f'./../{video_filename}.mp4'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -182,8 +198,7 @@ except FileNotFoundError:
 
 # Compile frames into a video
 clip = ImageSequenceClip(frames, fps=FPS)  # fps can be adjusted
-clip.write_videofile(f'{config.video_filename}.mp4', codec="libx264")
-renderWindowInteractor.Start()
+clip.write_videofile(f'{video_filename}.mp4', codec="libx264")
 
 # Path where the files are located (assuming current directory for this example)
 path = '.'

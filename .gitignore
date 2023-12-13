@@ -1,0 +1,51 @@
+# Byte-compiled / optimized Python files
+__pycache__/
+*.pyc
+*.pyo
+__pycache__/*
+*.pyc
+*.pyo
+
+# IDE-specific files/directories
+.vscode/
+.idea/
+*.iml
+
+# Virtual Environment
+venv/
+env/
+
+# Compiled Python files
+*.pyc
+
+# macOS system files
+.DS_Store
+
+# Compiled extension modules
+*.so
+
+# Python package logs
+pip-log.txt
+
+# Environment variables file (if using .env)
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs and other runtime data
+*.log
+
+# Cache files (for example, from requests or django-debug-toolbar)
+.cache/
+
+# Ignore any local configuration files
+local_settings.py
+
+# Ignore .pyc files and __pycache__ directory in the project root
+__pycache__/
+*.pyc
+
+# Ignore system-specific files and folders
+*.DS_Store
+Thumbs.db
