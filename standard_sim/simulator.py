@@ -3,7 +3,6 @@ import numpy as np
 import os
 from tqdm import tqdm
 import json
-import numpy as np
 
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
@@ -155,7 +154,7 @@ for t in tqdm(range(simulation_steps), desc='Simulating'):
 
     simulation_data.append(timestep_data)
 
-file_path = f'{data_filename}.csv'  # Replace with your file path
+file_path = f'{data_filename}.csv' 
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -163,7 +162,7 @@ except FileNotFoundError:
 
 with open(file_path, 'w', newline='') as file:
     writer = csv.writer(file)
-    # Write a header row (optional, depending on your data structure)
+    # Write a header row
     header = ['timestep', 'number_of_bodies']
     for b in range(len(body_list)):
         header += [f'body_{b}_pos_x', f'body_{b}_pos_y', f'body_{b}_pos_z',

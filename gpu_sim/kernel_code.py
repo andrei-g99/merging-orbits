@@ -67,47 +67,47 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {{
 
                 if ( m_i <= m_j )
                 {{
-                    output[i].alive = 0;
-                    output[i].velocity[0] = velocity_of_merger.x;
-                    output[i].velocity[1] = velocity_of_merger.y;
-                    output[i].velocity[2] = velocity_of_merger.z;
-                    output[i].position[0] = center_of_mass.x;
-                    output[i].position[1] = center_of_mass.y;
-                    output[i].position[2] = center_of_mass.z;
-                    output[i].mass = total_mass;
-                    output[i].radius = new_radius;
+                    bodies[i].alive = 0;
+                    bodies[i].velocity[0] = velocity_of_merger.x;
+                    bodies[i].velocity[1] = velocity_of_merger.y;
+                    bodies[i].velocity[2] = velocity_of_merger.z;
+                    bodies[i].position[0] = center_of_mass.x;
+                    bodies[i].position[1] = center_of_mass.y;
+                    bodies[i].position[2] = center_of_mass.z;
+                    bodies[i].mass = total_mass;
+                    bodies[i].radius = new_radius;
 
-                    output[j].alive = 1;
-                    output[j].velocity[0] = velocity_of_merger.x;
-                    output[j].velocity[1] = velocity_of_merger.y;
-                    output[j].velocity[2] = velocity_of_merger.z;
-                    output[j].position[0] = center_of_mass.x;
-                    output[j].position[1] = center_of_mass.y;
-                    output[j].position[2] = center_of_mass.z;
-                    output[j].mass = total_mass;
-                    output[j].radius = new_radius;
+                    bodies[j].alive = 1;
+                    bodies[j].velocity[0] = velocity_of_merger.x;
+                    bodies[j].velocity[1] = velocity_of_merger.y;
+                    bodies[j].velocity[2] = velocity_of_merger.z;
+                    bodies[j].position[0] = center_of_mass.x;
+                    bodies[j].position[1] = center_of_mass.y;
+                    bodies[j].position[2] = center_of_mass.z;
+                    bodies[j].mass = total_mass;
+                    bodies[j].radius = new_radius;
                 }}
                 else
                 {{
-                    output[j].alive = 0;
-                    output[j].velocity[0] = velocity_of_merger.x;
-                    output[j].velocity[1] = velocity_of_merger.y;
-                    output[j].velocity[2] = velocity_of_merger.z;
-                    output[j].position[0] = center_of_mass.x;
-                    output[j].position[1] = center_of_mass.y;
-                    output[j].position[2] = center_of_mass.z;
-                    output[j].mass = total_mass;
-                    output[j].radius = new_radius;
+                    bodies[j].alive = 0;
+                    bodies[j].velocity[0] = velocity_of_merger.x;
+                    bodies[j].velocity[1] = velocity_of_merger.y;
+                    bodies[j].velocity[2] = velocity_of_merger.z;
+                    bodies[j].position[0] = center_of_mass.x;
+                    bodies[j].position[1] = center_of_mass.y;
+                    bodies[j].position[2] = center_of_mass.z;
+                    bodies[j].mass = total_mass;
+                    bodies[j].radius = new_radius;
 
-                    output[i].alive = 1;
-                    output[i].velocity[0] = velocity_of_merger.x;
-                    output[i].velocity[1] = velocity_of_merger.y;
-                    output[i].velocity[2] = velocity_of_merger.z;
-                    output[i].position[0] = center_of_mass.x;
-                    output[i].position[1] = center_of_mass.y;
-                    output[i].position[2] = center_of_mass.z;
-                    output[i].mass = total_mass;
-                    output[i].radius = new_radius;
+                    bodies[i].alive = 1;
+                    bodies[i].velocity[0] = velocity_of_merger.x;
+                    bodies[i].velocity[1] = velocity_of_merger.y;
+                    bodies[i].velocity[2] = velocity_of_merger.z;
+                    bodies[i].position[0] = center_of_mass.x;
+                    bodies[i].position[1] = center_of_mass.y;
+                    bodies[i].position[2] = center_of_mass.z;
+                    bodies[i].mass = total_mass;
+                    bodies[i].radius = new_radius;
                 }}
                 
                                         
@@ -129,30 +129,31 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int N) {{
 
             if(i == j)
             {{
-                output[i].accel_due_to[j][0] = 0;
-                output[i].accel_due_to[j][1] = 0;
-                output[i].accel_due_to[j][2] = 0;
+                bodies[i].accel_due_to[j][0] = 0;
+                bodies[i].accel_due_to[j][1] = 0;
+                bodies[i].accel_due_to[j][2] = 0;
 
-                output[j].accel_due_to[i][0] = 0;
-                output[j].accel_due_to[i][1] = 0;
-                output[j].accel_due_to[i][2] = 0;
+                bodies[j].accel_due_to[i][0] = 0;
+                bodies[j].accel_due_to[i][1] = 0;
+                bodies[j].accel_due_to[i][2] = 0;
             }}
             else
             {{
             
-                output[i].accel_due_to[j][0] = acceleration_ij.x;
-                output[i].accel_due_to[j][1] = acceleration_ij.y;
-                output[i].accel_due_to[j][2] = acceleration_ij.z;
+                bodies[i].accel_due_to[j][0] = acceleration_ij.x;
+                bodies[i].accel_due_to[j][1] = acceleration_ij.y;
+                bodies[i].accel_due_to[j][2] = acceleration_ij.z;
 
-                output[j].accel_due_to[i][0] = acceleration_ji.x;
-                output[j].accel_due_to[i][1] = acceleration_ji.y;
-                output[j].accel_due_to[i][2] = acceleration_ji.z;
+                bodies[j].accel_due_to[i][0] = acceleration_ji.x;
+                bodies[j].accel_due_to[i][1] = acceleration_ji.y;
+                bodies[j].accel_due_to[i][2] = acceleration_ji.z;
 
             }}
         }}
 
 
-
+        output[i] = bodies[i];
+        output[j] = bodies[j];
 
 
     }}
