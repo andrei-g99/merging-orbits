@@ -50,6 +50,9 @@ pip install pycuda
 - Tweaks and tests/experiments
 - TBD
 
+# Current state
+- Working on GPU acceleration with CUDA
+
 # Gallery
 
 ![Demo](https://github.com/andrei-g99/andrei-g99.github.io/blob/main/mergingorbits.png)
