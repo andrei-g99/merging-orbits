@@ -97,12 +97,20 @@ for i, body in enumerate(body_array):
     body_array[i]['velocity'][1] = 5*(np.random.uniform()-0.5)
     body_array[i]['velocity'][2] = 5*(np.random.uniform()-0.5)
 
-    r = 10*(np.random.uniform()) + 10
+    r = 5*(np.random.uniform()) + 5
 
     body_array[i]['mass'] = radius_to_mass(r)
     body_array[i]['radius'] = r
     body_array[i]['alive'] = int(1)
 
+body_array[-1]['radius'] = 60
+body_array[-1]['mass'] = radius_to_mass(r)
+body_array[-1]['position'][0] = 0
+body_array[-1]['position'][1] = 0
+body_array[-1]['position'][2] = 0
+body_array[-1]['velocity'][0] = 0
+body_array[-1]['velocity'][1] = 0
+body_array[-1]['velocity'][2] = 0
 
 # Calculate block and grid dimensions
 block_size = (threads_per_block, 1, 1)
@@ -116,6 +124,22 @@ alive_cnt_gpu = cuda.mem_alloc(alive_cnt.nbytes)
 input_gpu = cuda.mem_alloc(body_array.nbytes)
 output_gpu = cuda.mem_alloc(body_array.nbytes)
 
+file_path = f'{data_filename}.csv'  # Replace with your file path
+try:
+    os.remove(file_path)
+except FileNotFoundError:
+    print('Creating new file')
+
+with open(file_path, 'w', newline='') as file:
+    writer = csv.writer(file)
+    # Write a header row (optional, depending on your data structure)
+    header = ['timestep', 'number_of_bodies']
+    for b in range(N):
+        header += [f'body_{b}_pos_x', f'body_{b}_pos_y', f'body_{b}_pos_z',
+                f'body_{b}_vel_x', f'body_{b}_vel_y', f'body_{b}_vel_z', f'body_{b}_radius', f'body_{b}_mass', f'body_{b}_alive']
+    writer.writerow(header)
+
+loop_cnt = 1
 # Simulation loop
 for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
@@ -153,28 +177,21 @@ for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
 
     simulation_data.append(timestep_data)
 
+    if (loop_cnt % 1000 == 0) or (t == (simulation_steps - 1)):
+        with open(file_path, 'a', newline='') as file:
+            writer = csv.writer(file)
 
-file_path = f'{data_filename}.csv'  # Replace with your file path
-try:
-    os.remove(file_path)
-except FileNotFoundError:
-    print('Creating new file')
+            # Write the data
+            for row in simulation_data:
+                writer.writerow(row)
+            print(f'{data_filename}.csv has been generated')
+        simulation_data = []
 
-with open(file_path, 'w', newline='') as file:
-    writer = csv.writer(file)
-    # Write a header row (optional, depending on your data structure)
-    header = ['timestep', 'number_of_bodies']
-    for b in range(N):
-        header += [f'body_{b}_pos_x', f'body_{b}_pos_y', f'body_{b}_pos_z',
-                   f'body_{b}_vel_x', f'body_{b}_vel_y', f'body_{b}_vel_z', f'body_{b}_radius', f'body_{b}_mass', f'body_{b}_alive']
-    writer.writerow(header)
+    loop_cnt += 1
 
 
-    # Write the data
-    for row in tqdm(simulation_data, desc='Saving simulation data'):
-        writer.writerow(row)
-    print(f'{data_filename}.csv has been generated')
 
 # Free GPU memory
 input_gpu.free()
 output_gpu.free()
+alive_cnt_gpu.free()

@@ -1,12 +1,12 @@
 {
     "simulation":{
 
-        "number_of_bodies": 1000,
+        "number_of_bodies": 10000,
         "matter_density": 1,
-        "gravity_constant": 1,
-        "init_box_length": 1250,
-        "simulation_steps": 10000,
-        "sizeof_timestep": 0.05,
+        "gravity_constant": 0.1,
+        "init_box_length": 5000,
+        "simulation_steps": 50000,
+        "sizeof_timestep": 0.01,
         "data_filename": "sim_data"
 
     },
@@ -14,8 +14,8 @@
     "rendering":{
 
         "fps": 60,
-        "video_duration": 5,
-        "camera_position": [-4000, 500, 500],
+        "video_duration": 20,
+        "camera_position": [-8000, 500, 500],
         "camera_direction": [0, 0, 0],
         "nearclip": 0.1,
         "farclip": 20000,
