@@ -1,6 +1,8 @@
 # merging-orbits
 N-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
 
+Now with GPU accelerated version. (CUDA)
+
 # Basic setup
 - Install Anaconda3 on your system
 - Create a new conda virtual environment with Python version 3.10:
