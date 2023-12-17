@@ -148,7 +148,7 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
         scalars = vtk.vtkFloatArray()
         for i in range(int(N)):
-            if row[f'body_{i}_alive'] == 1:
+            if int(row[f'body_{i}_alive']) == 1:
                 x = float(row[f'body_{i}_pos_x'])
                 y = float(row[f'body_{i}_pos_y'])
                 z = float(row[f'body_{i}_pos_z'])
