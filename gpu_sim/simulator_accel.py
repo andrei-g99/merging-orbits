@@ -88,43 +88,20 @@ func = mod.get_function("gravitySimulator")
 simulation_data = []
 
 # Initialize bodies
-# for i, body in enumerate(body_array):
-#     body_array[i]['position'][0] = init_box_length*(np.random.uniform()-0.5)
-#     body_array[i]['position'][1] = init_box_length*(np.random.uniform()-0.5)
-#     body_array[i]['position'][2] = init_box_length*(np.random.uniform()-0.5)
+for i, body in enumerate(body_array):
+    body_array[i]['position'][0] = init_box_length*(np.random.uniform()-0.5)
+    body_array[i]['position'][1] = init_box_length*(np.random.uniform()-0.5)
+    body_array[i]['position'][2] = init_box_length*(np.random.uniform()-0.5)
 
-#     body_array[i]['velocity'][0] = 5*(np.random.uniform()-0.5)
-#     body_array[i]['velocity'][1] = 5*(np.random.uniform()-0.5)
-#     body_array[i]['velocity'][2] = 5*(np.random.uniform()-0.5)
+    body_array[i]['velocity'][0] = 5*(np.random.uniform()-0.5)
+    body_array[i]['velocity'][1] = 5*(np.random.uniform()-0.5)
+    body_array[i]['velocity'][2] = 5*(np.random.uniform()-0.5)
 
-#     r = 10*(np.random.uniform()) + 10
+    r = 10*(np.random.uniform()) + 10
 
-#     body_array[i]['mass'] = radius_to_mass(r)
-#     body_array[i]['radius'] = r
-#     body_array[i]['alive'] = int(1)
-
-# Manual initialization
-body_array[0]['position'][0] = 0
-body_array[0]['position'][1] = 300
-body_array[0]['position'][2] = 0
-body_array[0]['velocity'][0] = 0
-body_array[0]['velocity'][1] = 0
-body_array[0]['velocity'][2] = 0
-r = 10
-body_array[0]['mass'] = radius_to_mass(r)
-body_array[0]['radius'] = r
-body_array[0]['alive'] = int(1)
-
-body_array[1]['position'][0] = 0
-body_array[1]['position'][1] = 0
-body_array[1]['position'][2] = 0
-body_array[1]['velocity'][0] = 0
-body_array[1]['velocity'][1] = 0
-body_array[1]['velocity'][2] = 0
-r = 30
-body_array[1]['mass'] = radius_to_mass(r)
-body_array[1]['radius'] = r
-body_array[1]['alive'] = int(1)
+    body_array[i]['mass'] = radius_to_mass(r)
+    body_array[i]['radius'] = r
+    body_array[i]['alive'] = int(1)
 
 
 # Calculate block and grid dimensions

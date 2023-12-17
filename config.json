@@ -1,11 +1,11 @@
 {
     "simulation":{
 
-        "number_of_bodies": 2,
+        "number_of_bodies": 1000,
         "matter_density": 1,
         "gravity_constant": 1,
-        "init_box_length": 1000,
-        "simulation_steps": 1000,
+        "init_box_length": 1250,
+        "simulation_steps": 10000,
         "sizeof_timestep": 0.05,
         "data_filename": "sim_data"
 
