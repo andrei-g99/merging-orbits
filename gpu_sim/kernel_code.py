@@ -140,10 +140,7 @@ __global__ void gravitySimulator(Body *bodies, Body *output, int* alive_cnt, int
 
 
             }}
-            if (i == 0)
-            {{
-            printf("accel = [%f, %f, %f]\\n", total_accel_x, total_accel_y, total_accel_z);
-            }}
+
             //add contributions from each body
             output[i].velocity[0] = vel_x + (total_accel_x * dt);
             output[i].velocity[1] = vel_y + (total_accel_y * dt);
