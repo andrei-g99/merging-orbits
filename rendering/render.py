@@ -99,7 +99,7 @@ window_resolution = config['rendering']['window_resolution'];
 video_filename = config['rendering']['video_filename'];
 
 
-data = pd.read_csv(f'./../{data_filename}.csv')
+data = pd.read_csv(f'./{data_filename}.csv')
 
 # Controlling FPS and time: FPS * video_duration(seconds) = sim_timesteps
 # e.g. FPS = 60 and video_duration = 10
@@ -148,7 +148,7 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
         scalars = vtk.vtkFloatArray()
         for i in range(int(N)):
-            if row[f'body_{i}_status']:
+            if row[f'body_{i}_alive'] == 1:
                 x = float(row[f'body_{i}_pos_x'])
                 y = float(row[f'body_{i}_pos_y'])
                 z = float(row[f'body_{i}_pos_z'])
@@ -190,7 +190,7 @@ for index, row in tqdm(data.iterrows(), desc='Rendering'):
 
     cnt += 1
 
-file_path = f'./../{video_filename}.mp4'  # Replace with your file path
+file_path = f'./{video_filename}.mp4'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:

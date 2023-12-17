@@ -54,8 +54,7 @@ body_dtype = np.dtype([
     ('velocity', np.float32, 3),
     ('radius', np.float32),
     ('mass', np.float32),
-    ('alive', np.int32),
-    ('accel_due_to', np.float32, (N, 3))
+    ('alive', np.int32)
 ])
 
 body_array = np.empty(N, dtype=body_dtype)
@@ -104,80 +103,56 @@ for i, body in enumerate(body_array):
     body_array[i]['radius'] = r
     body_array[i]['alive'] = int(1)
 
-    for k in range(N):
-        body_array[i]['accel_due_to'][k][0] = 0
-        body_array[i]['accel_due_to'][k][1] = 0
-        body_array[i]['accel_due_to'][k][2] = 0
-
 # Calculate block and grid dimensions
-block_size = (int(math.sqrt(threads_per_block)), int(math.sqrt(threads_per_block)), 1)
+block_size = (threads_per_block, 1, 1)
 grid_x = math.ceil(len(body_array) / threads_per_block)
 grid_size = (grid_x, 1, 1)
+
+alive_cnt = np.array([N], dtype=np.int32)
+
+alive_cnt_gpu = cuda.mem_alloc(alive_cnt.nbytes)
 
 input_gpu = cuda.mem_alloc(body_array.nbytes)
 output_gpu = cuda.mem_alloc(body_array.nbytes)
 
 # Simulation loop
 for t in tqdm(range(simulation_steps), desc='Simulating on GPU'):
-    at_least_two_alive_flag = 0
-    for i in body_array:
-        if i['alive'] == int(1):
-            at_least_two_alive_flag += 1
-            if at_least_two_alive_flag == 2:
-                at_least_two_alive_flag = 1
-                break
 
-    if at_least_two_alive_flag == 1:
-            output_data = np.zeros_like(body_array)
+    output_data = np.zeros_like(body_array)
+    # Transfer data to GPU
+    cuda.memcpy_htod(input_gpu, body_array)
+    cuda.memcpy_htod(alive_cnt_gpu, alive_cnt)
 
-            # Transfer data to GPU
-            cuda.memcpy_htod(input_gpu, body_array)
-        
-            # Kernel execution
-            func(input_gpu, output_gpu, np.int32(len(body_array)), block=block_size, grid=grid_size)
-        
-            # Wait for kernel to finish
-            cuda.Context.synchronize()
-        
-            # Retrieve
-            cuda.memcpy_dtoh(output_data, output_gpu)
-            
-        
-            for i in range(len(output_data)):
-                total_accel = np.array([0, 0, 0], np.float32)
-                for k in range(N):
-                    total_accel += np.array([output_data[i]['accel_due_to'][k][0], output_data[i]['accel_due_to'][k][1], output_data[i]['accel_due_to'][k][2]], np.float32)
-                
-                body_array[i]['position'] = output_data[i]['position']
-                body_array[i]['velocity'] = output_data[i]['velocity']
-                body_array[i]['mass'] = output_data[i]['mass']
-                body_array[i]['radius'] = output_data[i]['radius']
-                body_array[i]['alive'] = output_data[i]['alive']
-        
-        
-                body_array[i]['velocity'] = body_array[i]['velocity'] + total_accel * dt
-        
-        
-                body_array[i]['position'] = body_array[i]['position'] + body_array[i]['velocity'] * dt
-        
-            # Collecting data at the current timestep
-            timestep_data = []
-            timestep_data.append(t)
-            timestep_data.append(N)
-            for i in range(len(body_array)):
-                timestep_data.append(body_array[i]['position'][0])
-                timestep_data.append(body_array[i]['position'][1])
-                timestep_data.append(body_array[i]['position'][2])
-                timestep_data.append(body_array[i]['velocity'][0])
-                timestep_data.append(body_array[i]['velocity'][1])
-                timestep_data.append(body_array[i]['velocity'][2])
-                timestep_data.append(body_array[i]['radius'])
-                timestep_data.append(body_array[i]['alive'])
-        
-            simulation_data.append(timestep_data)
+    # Kernel execution
+    func(input_gpu, output_gpu, alive_cnt_gpu, np.int32(len(body_array)), np.float32(G), np.float32(dt), block=block_size, grid=grid_size)
+
+    # Wait for kernel to finish
+    cuda.Context.synchronize()
+
+    # Retrieve
+    cuda.memcpy_dtoh(output_data, output_gpu)
+    cuda.memcpy_dtoh(alive_cnt, alive_cnt_gpu)
+
+    body_array = output_data
+
+    # Collecting data at the current timestep
+    timestep_data = []
+    timestep_data.append(t)
+    timestep_data.append(N)
+    for i in range(len(body_array)):
+        timestep_data.append(body_array[i]['position'][0])
+        timestep_data.append(body_array[i]['position'][1])
+        timestep_data.append(body_array[i]['position'][2])
+        timestep_data.append(body_array[i]['velocity'][0])
+        timestep_data.append(body_array[i]['velocity'][1])
+        timestep_data.append(body_array[i]['velocity'][2])
+        timestep_data.append(body_array[i]['radius'])
+        timestep_data.append(body_array[i]['alive'])
+
+    simulation_data.append(timestep_data)
 
 
-file_path = f'{data_filename}_gpu_accel.csv'  # Replace with your file path
+file_path = f'{data_filename}.csv'  # Replace with your file path
 try:
     os.remove(file_path)
 except FileNotFoundError:
@@ -196,7 +171,7 @@ with open(file_path, 'w', newline='') as file:
     # Write the data
     for row in tqdm(simulation_data, desc='Saving simulation data'):
         writer.writerow(row)
-    print(f'{data_filename}_gpu_accel.csv has been generated')
+    print(f'{data_filename}.csv has been generated')
 
 # Free GPU memory
 input_gpu.free()
