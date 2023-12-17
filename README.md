@@ -1,5 +1,6 @@
 # merging-orbits
 N-body gravitational simulator where object collisions are handled by a simplified body merger heuristic.
+
 Now with GPU accelerated version. (CUDA)
 
 # Basic setup
