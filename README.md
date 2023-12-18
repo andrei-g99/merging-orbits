@@ -53,7 +53,7 @@ pip install pycuda
 - TBD
 
 # Current state
-- Working on GPU acceleration with CUDA
+- Added GPU acceleration with CUDA
 
 # Gallery
 
