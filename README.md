@@ -42,7 +42,7 @@ pip install pycuda
 - For the accelerated version run the `simulator_accel.py` script
 
 # How to run a simulation
-- Set the initial conditions and rendering options in **config.py**
+- Set the initial conditions and rendering options in **config.json**
 - Run **simulator.py** (**simulator_accel.py** for the GPU accelerated version)
 - Run **render.py**
 
