@@ -47,13 +47,9 @@ pip install pycuda
 - Run **render.py**
 
 # To do list
-- Implement Barnes-Hut algorithm with octree
-- Implement some 3D spatial partitioning for collision detection
-- Tweaks and tests/experiments
-- TBD
-
-# Current state
-- Added GPU acceleration with CUDA
+- [ ] Implement Barnes-Hut algorithm with octree
+- [ ] Implement a 3D spatial partitioning strategy to speed up the collision handling/detection
+- [x] GPU Acceleration with CUDA
 
 # Gallery
 
