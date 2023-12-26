@@ -5,7 +5,7 @@ N-body gravitational simulator where object collisions are handled by a simplifi
 - Install Anaconda3 on your system
 - Create a new conda virtual environment with Python version 3.10:
 
-(or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env)
+(or you can create a new project with PyCharm and select Conda as your interpreter, it will automatically create a new conda env) 
 
 (If using windows powershell first run `conda init powershell`, restart the shell and try to activate the env)
 
